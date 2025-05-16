@@ -442,14 +442,16 @@ function chargerLogo(event) {
       doc.setFont("helvetica", "normal");
       doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, 40);  // Position sous le titre
 
-      // Date placée en haut à droite, juste sous le titre
-      const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
-      doc.text(
-        `${dateLabel} : ${factureData.date}`,
-        doc.internal.pageSize.width - 14,  // 14 mm de la marge droite
-        35,                                 // 30 mm du haut
-        { align: 'right' }
-      );
+      // Date placée en haut à gauche
+const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
+doc.setFontSize(12);
+doc.setFont("helvetica", "normal");
+doc.text(
+  `${dateLabel} : ${factureData.date}`,
+  14,  // 14 mm de la marge gauche
+  35   // 30 mm du haut
+);
+
 
       // Informations client
       const lignesClient = factureData.client.split('\n').filter(l => l.trim() !== '');
