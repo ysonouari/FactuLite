@@ -419,16 +419,20 @@ function chargerLogo(event) {
       document.getElementById('btnTelecharger').disabled = false;
     };
 
-    document.getElementById('btnTelecharger').onclick = function() {
-      const factureData = JSON.parse(localStorage.getItem('factureData'));
-      if (!factureData) return;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+   document.getElementById('btnTelecharger').onclick = function() {
+    const factureData = JSON.parse(localStorage.getItem('factureData'));
+    if (!factureData) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-      // Si un logo a été chargé, on l'ajoute en haut à gauche
-      if (logoImageBase64) {
+    // Si un logo a été chargé, on l'ajoute en haut à gauche
+    if (logoImageBase64) {
         doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
-      }
+    }
+
+    // Ajouter le titre juste après le logo
+    doc.setFontSize(16);
+    doc.text('Titre du document', 50, 20);  // Ajustez la position du titre
 
       // Dynamic Title: Based on "Devis" or "Facture"
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
