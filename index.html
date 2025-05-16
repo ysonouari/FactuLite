@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=0.5" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Création de Facture</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,47 +12,39 @@
       --primary-color: #1E40AF;
       --secondary-color: #4B5563;
       --background-color: #F3F4F6;
-      --accent-color: #10B981;
-      --button-color: #F3F4F6;
+      --button-color: #10B981;
       --border-radius: 10px;
-      --input-padding: 12px;
-      --button-padding: 15px;
-    }
-
-    input, select, textarea {
-      font-size: 16px;
+      --input-padding: 14px;
+      --button-padding: 16px;
     }
 
     body {
       font-family: 'Arial', sans-serif;
       background-color: var(--background-color);
       color: var(--secondary-color);
-      margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow-x: hidden;
+      margin: 0;
     }
 
     .login-container {
       background-color: white;
       border-radius: var(--border-radius);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
       padding: 40px;
       width: 100%;
       max-width: 400px;
       box-sizing: border-box;
-      margin: 0 15px;
-      transition: all 0.3s ease-in-out;
+      transition: transform 0.3s ease;
     }
 
     h2 {
       color: var(--primary-color);
-      font-size: 2.2rem;
+      font-size: 2rem;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       text-transform: uppercase;
     }
 
@@ -70,152 +62,84 @@
       margin: 10px 0;
       border-radius: var(--border-radius);
       font-size: 1rem;
+      border: 1px solid #ccc;
       box-sizing: border-box;
       transition: all 0.3s ease;
-      border: 1px solid #ccc;
     }
 
     input:focus, select:focus {
       outline: none;
       border: 2px solid var(--primary-color);
-      box-shadow: 0 0 5px rgba(30, 64, 175, 0.5);
     }
 
     button[type="button"], button[type="submit"] {
       background-color: var(--button-color);
-      color: var(--secondary-color);
-      border: 1px solid #D1D5DB;
+      color: white;
+      border: none;
       cursor: pointer;
       font-weight: bold;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      padding: 14px;
+      transition: background-color 0.3s ease;
+      padding: var(--button-padding);
+      margin-top: 20px;
+      border-radius: var(--border-radius);
     }
 
     button[type="button"]:hover, button[type="submit"]:hover {
-      background-color: var(--accent-color);
-      color: white;
-      transform: scale(1.05);
+      background-color: #16a34a;
     }
 
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .forgot-password {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .forgot-password a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
     }
 
     .loader {
       display: none;
       text-align: center;
       font-weight: bold;
-      color: var(--accent-color);
+      color: var(--button-color);
       margin-top: 20px;
-    }
-
-    #total {
-      font-weight: 600;
-      margin-top: 10px;
-      color: var(--primary-color);
-    }
-
-    .entreprise-info {
-      background-color: #F9FAFB;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: var(--border-radius);
-      display: none;
-      transition: all 0.3s ease;
-    }
-
-    .entreprise-info input {
-      margin-bottom: 10px;
-    }
-
-    /* Toast Notification Style */
-    .toast {
-      visibility: hidden;
-      min-width: 250px;
-      margin-left: -125px;
-      background-color: #4CAF50;
-      color: white;
-      text-align: center;
-      border-radius: 2px;
-      padding: 16px;
-      position: fixed;
-      z-index: 1;
-      left: 50%;
-      top: 50%;
-      font-size: 17px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      transition: visibility 0.5s, opacity 0.5s ease-in-out;
-    }
-
-    .toast.show {
-      visibility: visible;
-      opacity: 1;
     }
 
     @media (max-width: 768px) {
       .login-container {
         padding: 20px;
       }
-      h2 {
-        font-size: 1.5rem;
-      }
-    }
-
-    /* Styling for copyright */
-    .copyright {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      font-size: 1rem;
-      color: #4B5563;
-      text-align: right;
-      padding: 10px;
-      width: auto;
-    }
-
-    textarea {
-      width: 100%;
-      padding: var(--input-padding);
-      margin: 10px 0;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      box-sizing: border-box;
-      border: 1px solid #D1D5DB;
-      resize: vertical;
-      transition: border-color 0.3s ease;
-      background-color: white;
-      color: #111827;
-      font-family: 'Arial', sans-serif;
-    }
-
-    textarea:focus {
-      outline: none;
-      border: 2px solid var(--primary-color);
     }
   </style>
 </head>
 <body>
-  <!-- Toast Notification -->
-  <div id="toastMessage" class="toast">
-    <p id="toastText"></p>
-  </div>
-
   <div class="login-container" id="loginContainer">
     <h2>Connexion</h2>
-    <input type="text" id="username" placeholder="Nom d'utilisateur" required />
-    <input type="password" id="password" placeholder="Mot de passe" required />
-    <div>
-      <input type="checkbox" id="rememberMe" />
-      <label for="rememberMe">Se souvenir de moi</label>
-    </div>
-    <button onclick="verifierLogin()">Se connecter</button>
+    <form id="loginForm">
+      <label for="username">Nom d'utilisateur</label>
+      <input type="text" id="username" placeholder="Nom d'utilisateur" required />
+
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" placeholder="Mot de passe" required />
+
+      <div class="forgot-password">
+        <a href="#">Mot de passe oublié ?</a>
+      </div>
+
+      <button type="submit">Se connecter</button>
+    </form>
   </div>
 
   <div class="container" style="display: none;" id="mainContainer">
     <h2>Création de Facture</h2>
     <button onclick="deconnexion()">🔒 Déconnexion</button>
+    <!-- Formulaire pour la création de la facture -->
     <form id="factureForm">
       <label for="type">Type</label>
       <select name="type" id="type" required>
@@ -228,13 +152,14 @@
 
       <label for="date">Date</label>
       <input type="date" name="date" id="date" required />
+
       <label for="client">Client</label>
       <textarea name="client" id="client" rows="6" required placeholder="Détails relatifs au client..."></textarea>
 
       <label for="devise">Devise</label>
       <select name="devise" id="devise" required onchange="mettreAJourTotaux()">
         <option value="€">€</option>
-        <option value="DH" selected>DH</option>
+        <option value="DH" selected>DH</option>  <!-- DH sélectionné par défaut -->
       </select>
 
       <label for="tva">TVA (%)</label>
@@ -281,6 +206,7 @@
   </div>
 
   <script>
+    // Fonction pour afficher la notification Toast
     function afficherToast(message) {
       const toast = document.getElementById('toastMessage');
       const toastText = document.getElementById('toastText');
@@ -288,7 +214,7 @@
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, 3000); // La notification disparaît après 3 secondes
     }
 
     function protegerAcces() {
@@ -435,15 +361,13 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Ajout du logo en haut à gauche
       if (logoImageBase64) {
         doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
       }
 
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
 
-      // Crée un saut de 4 lignes après le logo
-      let titleYPos = 40; // Position après 4 lignes de saut (environ 10mm par ligne)
+      let titleYPos = 40; 
       doc.setFontSize(30);
       doc.setFont("helvetica", "bold");
       doc.text(title, 105, titleYPos, { align: "center" });
