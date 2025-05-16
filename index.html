@@ -249,9 +249,10 @@
       </div>
     </form>
     <div class="button-group">
-      <button type="button" onclick="afficherFormEntreprise()">🖋️ Informations sur le vendeur</button>
+      <button type="button" onclick="afficherFormEntreprise()">🖋️ Informations Entreprise</button>
     </div>
     <div class="entreprise-info" id="entrepriseInfoForm">
+      <h3>Informations sur le vendeur</h3>
       <label for="nomEntreprise">Informations sur le vendeur</label>
       <textarea id="nomEntreprise" rows="4" placeholder="Saisir les informations du vendeur..."></textarea>
       <button type="button" onclick="enregistrerEntreprise()">Enregistrer</button>
@@ -425,17 +426,10 @@ function chargerLogo(event) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Add logo first, then title
-if (logoImageBase64) {
-  doc.addImage(logoImageBase64, 'PNG', 10, 10, 30, 30); // x, y, width, height
-}
-
-// Title should be placed below the logo
-const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
-doc.setFontSize(30);  // Increased font size for the title
-doc.setFont("helvetica", "bold");  // Bold title
-doc.text(title, 105, 40, { align: "center" }); // Adjusted Y position to move it below the logo
-
+      // Si un logo a été chargé, on l'ajoute en haut à gauche
+      if (logoImageBase64) {
+        doc.addImage(logoImageBase64, 'PNG', 10, 10, 30, 30); // x, y, largeur, hauteur
+      }
 
       // Dynamic Title: Based on "Devis" or "Facture"
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
@@ -448,16 +442,14 @@ doc.text(title, 105, 40, { align: "center" }); // Adjusted Y position to move it
       doc.setFont("helvetica", "normal");
       doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, 40);  // Position sous le titre
 
-      // Date placée en haut à gauche
-const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
-doc.setFontSize(12);
-doc.setFont("helvetica", "normal");
-doc.text(
-  `${dateLabel} : ${factureData.date}`,
-  14,  // 14 mm de la marge gauche
-  35   // 30 mm du haut
-);
-
+      // Date placée en haut à droite, juste sous le titre
+      const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
+      doc.text(
+        `${dateLabel} : ${factureData.date}`,
+        doc.internal.pageSize.width - 14,  // 14 mm de la marge droite
+        35,                                 // 30 mm du haut
+        { align: 'right' }
+      );
 
       // Informations client
       const lignesClient = factureData.client.split('\n').filter(l => l.trim() !== '');
@@ -530,6 +522,15 @@ doc.text(
       doc.text(`Sous-total HT : ${totalHT.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 20);
       doc.text(`TVA (${factureData.tva}%) : ${tva.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 30);
       doc.text(`Total TTC : ${totalTTC.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 40);
+
+      // Footer with company info
+      if (entrepriseInfo) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        if (entrepriseInfo.nom) {
+          doc.text(`${entrepriseInfo.nom} | ${entrepriseInfo.contact}`, 14, doc.internal.pageSize.height - 20);
+        }
+      }
 
       // Save PDF
       doc.save(`${factureData.client}_facture.pdf`);
