@@ -646,14 +646,17 @@
       yPos += (infoClient.split("\n").length * 6) + 6;
 
       // Ajouter la note au PDF
-      // Ajouter la note à la fin (après le Total TTC)
-  const note = document.getElementById('note').value || "";
-  if (note) {
-    doc.setFontSize(12);
-    doc.text("Note :", 14, finalY + 40);  // Position de la note après Total TTC
-    doc.setFontSize(10);
-    doc.text(note.split("\n"), 14, finalY + 48);  // Position du texte de la note
-  }
+const note = document.getElementById('note').value || "";
+if (note) {
+  yPos += 12; // Adding space after the "Total TTC" for the note
+  doc.setFontSize(12);
+  doc.text("Note :", 14, yPos); // Label for the note
+  yPos += 6; // Small space
+  doc.setFontSize(10);
+  doc.text(note.split("\n"), 14, yPos); // The note text
+  yPos += (note.split("\n").length * 6) + 6; // Adjust the position after the note
+}
+
 
       // Préparer les données pour autoTable
       const rows = [];
