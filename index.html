@@ -431,10 +431,16 @@ function chargerLogo(event) {
       }
 
       // Dynamic Title: Based on "Devis" or "Facture"
-      const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
-      doc.setFontSize(30);  // Increased font size for the title
-      doc.setFont("helvetica", "bold");  // Bold title
-      doc.text(title, 105, 20, { align: "center" });
+const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
+doc.setFontSize(30);  // Augmenter la taille de la police pour le titre
+doc.setFont("helvetica", "bold");  // Titre en gras
+doc.text(title, 105, 20, { align: "center" });  // Titre centré à 20 mm du haut
+
+// Placer le logo juste après le titre
+if (logoImageBase64) {
+  doc.addImage(logoImageBase64, 'PNG', 10, 30, 30, 30); // x = 10 mm, y = 30 mm du haut, largeur et hauteur = 30 mm
+}
+
 
       // Afficher le numéro de la facture
       doc.setFontSize(12);
