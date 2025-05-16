@@ -420,100 +420,104 @@ function chargerLogo(event) {
     };
 
     document.getElementById('btnTelecharger').onclick = function() {
-      const factureData = JSON.parse(localStorage.getItem('factureData'));
-      if (!factureData) return;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+  const factureData = JSON.parse(localStorage.getItem('factureData'));
+  if (!factureData) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-      // Si un logo a été chargé, on l'ajoute en haut à gauche
-      if (logoImageBase64) {
-        doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
+  // Si un logo a été chargé, on l'ajoute en haut à gauche
+  if (logoImageBase64) {
+    doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
+  }
+
+  // Définir l'espacement pour descendre les informations
+  const initialY = 40; // Position initiale pour les informations après le logo
+  let yPos = initialY;
+
+  // Titre dynamique : en fonction de "Devis" ou "Facture"
+  const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
+  doc.setFontSize(30);  // Taille de police augmentée pour le titre
+  doc.setFont("helvetica", "bold");  // Titre en gras
+  doc.text(title, 105, yPos, { align: "center" });
+
+  // Incrémenter yPos pour descendre sous le titre
+  yPos += 10;
+
+  // Afficher le numéro de la facture
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, yPos);  // Position sous le titre
+
+  // Descendre pour la date
+  yPos += 10;
+  const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
+  doc.text(`${dateLabel} : ${factureData.date}`, 14, yPos);
+
+  // Descendre pour les informations client
+  yPos += 20;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("Informations client :", 14, yPos);
+  yPos += 10;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+
+  const lignesClient = factureData.client.split('\n').filter(l => l.trim() !== '');
+  const ligneHeight = 6;
+  lignesClient.forEach(ligne => {
+    if (yPos > 270) {
+      doc.addPage();
+      yPos = 20;
+    }
+    doc.text(ligne, 20, yPos);
+    yPos += ligneHeight;
+  });
+
+  // Informations sur le vendeur
+  const entrepriseInfo = JSON.parse(localStorage.getItem('entrepriseInfo'));
+  if (entrepriseInfo) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Informations sur le vendeur :", 14, yPos + 10);
+    yPos += 20;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    const lignesEntreprise = entrepriseInfo.nom.split('\n').filter(l => l.trim() !== '');
+    lignesEntreprise.forEach(ligne => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
       }
+      doc.text(ligne, 20, yPos);
+      yPos += ligneHeight;
+    });
+  }
 
-      // Dynamic Title: Based on "Devis" or "Facture"
-      const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
-      doc.setFontSize(30);  // Increased font size for the title
-      doc.setFont("helvetica", "bold");  // Bold title
-      doc.text(title, 105, 20, { align: "center" });
+  // Table Header
+  doc.autoTable({
+    startY: yPos + 10,
+    head: [['Description', `Prix Unitaire (${factureData.devise})`, 'Quantité', `Total (${factureData.devise})`]], 
+    body: factureData.lignes.map(ligne => [
+      ligne.nom, 
+      `${ligne.prix.toFixed(2)} ${factureData.devise}`, 
+      ligne.qte,  
+      `${(ligne.prix * ligne.qte).toFixed(2)} ${factureData.devise}`  
+    ]),
+    styles: { 
+      cellPadding: 4,
+      lineColor: [200, 200, 200],
+      lineWidth: 0.1,
+      fontSize: 10,
+      cellWidth: 'auto',
+    },
+    theme: 'grid',
+    margin: { top: 10, bottom: 20 },
+    tableWidth: 'auto',
+  });
+};
 
-      // Afficher le numéro de la facture
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, 40);  // Position sous le titre
-
-      // Date placée en haut à gauche
-const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
-doc.setFontSize(12);
-doc.setFont("helvetica", "normal");
-doc.text(
-  `${dateLabel} : ${factureData.date}`,
-  14,  // 14 mm de la marge gauche
-  35   // 30 mm du haut
-);
-
-
-      // Informations client
-      const lignesClient = factureData.client.split('\n').filter(l => l.trim() !== '');
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.text("Informations client :", 14, 50);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(11);
-
-      let yPos = 60;
-      const ligneHeight = 6;
-      lignesClient.forEach(ligne => {
-        if (yPos > 270) {
-          doc.addPage();
-          yPos = 20;
-        }
-        doc.text(ligne, 20, yPos);
-        yPos += ligneHeight;
-      });
-
-      // Informations sur le vendeur
-      const entrepriseInfo = JSON.parse(localStorage.getItem('entrepriseInfo'));
-      if (entrepriseInfo) {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("Informations sur le vendeur :", 14, yPos + 10);
-        yPos += 20;
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        const lignesEntreprise = entrepriseInfo.nom.split('\n').filter(l => l.trim() !== '');
-        lignesEntreprise.forEach(ligne => {
-          if (yPos > 270) {
-            doc.addPage();
-            yPos = 20;
-          }
-          doc.text(ligne, 20, yPos);
-          yPos += ligneHeight;
-        });
-      }
-
-      // Table Header
-      doc.autoTable({
-        startY: yPos + 10,
-        head: [['Description', `Prix Unitaire (${factureData.devise})`, 'Quantité', `Total (${factureData.devise})`]], 
-        body: factureData.lignes.map(ligne => [
-          ligne.nom, 
-          `${ligne.prix.toFixed(2)} ${factureData.devise}`, 
-          ligne.qte,  
-          `${(ligne.prix * ligne.qte).toFixed(2)} ${factureData.devise}`  
-        ]),
-        styles: { 
-          cellPadding: 4,
-          lineColor: [200, 200, 200],
-          lineWidth: 0.1,
-          fontSize: 10,
-          cellWidth: 'auto',
-        },
-        theme: 'grid',
-        margin: { top: 10, bottom: 20 },
-        tableWidth: 'auto',
-      });
 
       // Total Calculation
       const totalHT = factureData.lignes.reduce((acc, ligne) => acc + (ligne.prix * ligne.qte), 0);
