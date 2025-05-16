@@ -425,11 +425,6 @@ function chargerLogo(event) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Si un logo a été chargé, on l'ajoute en haut à gauche
-      if (logoImageBase64) {
-        doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
-      }
-
       // Dynamic Title: Based on "Devis" or "Facture"
 const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
 doc.setFontSize(30);  // Augmenter la taille de la police pour le titre
