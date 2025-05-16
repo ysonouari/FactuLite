@@ -49,12 +49,13 @@
 
 .login-form input[type="text"], .login-form input[type="password"] {
   width: 100%;
-  padding: 12px;  /* Augmenter le padding pour plus de confort */
+  padding: 12px 15px;  /* Unification du padding */
   margin-bottom: 20px;  /* Espacement supplémentaire entre les champs */
-  border-radius: 6px;  /* Bords plus arrondis */
+  border-radius: 6px;  /* Bords arrondis */
   border: 1px solid #ccc;
   font-size: 1.1em;  /* Taille de police plus grande */
   transition: border 0.3s ease, box-shadow 0.3s ease;  /* Transition fluide lors du focus */
+  box-sizing: border-box;  /* Garantir que padding ne dépasse pas la largeur */
 }
 
 .login-form input[type="text"]:focus, .login-form input[type="password"]:focus {
@@ -88,6 +89,7 @@
   margin-top: 15px;
   font-size: 1em;
 }
+
 
 
     /* Sélecteurs pour les labels et inputs */
