@@ -425,10 +425,17 @@ function chargerLogo(event) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Si un logo a été chargé, on l'ajoute en haut à gauche
-      if (logoImageBase64) {
-        doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
-      }
+      // Add logo first, then title
+if (logoImageBase64) {
+  doc.addImage(logoImageBase64, 'PNG', 10, 10, 30, 30); // x, y, width, height
+}
+
+// Title should be placed below the logo
+const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
+doc.setFontSize(30);  // Increased font size for the title
+doc.setFont("helvetica", "bold");  // Bold title
+doc.text(title, 105, 40, { align: "center" }); // Adjusted Y position to move it below the logo
+
 
       // Dynamic Title: Based on "Devis" or "Facture"
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
