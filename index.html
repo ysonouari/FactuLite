@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.5" />
   <title>Création de Facture</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,48 +12,54 @@
       --primary-color: #1E40AF;
       --secondary-color: #4B5563;
       --background-color: #F3F4F6;
-      --button-color: #10B981;
+      --accent-color: #10B981;
+      --button-color: #F3F4F6;
       --border-radius: 10px;
-      --input-padding: 14px;
-      --button-padding: 16px;
+      --input-padding: 12px;
+      --button-padding: 15px;
+    }
+
+    input, select, textarea {
+      font-size: 16px;
     }
 
     body {
       font-family: 'Arial', sans-serif;
       background-color: var(--background-color);
       color: var(--secondary-color);
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
+      overflow-x: hidden;
     }
 
-    .login-container {
+    .container {
       background-color: white;
       border-radius: var(--border-radius);
-      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-      padding: 40px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
       width: 100%;
-      max-width: 400px;
+      max-width: 800px;
       box-sizing: border-box;
-      transition: transform 0.3s ease;
+      margin: 0 15px;
     }
 
     h2 {
       color: var(--primary-color);
       font-size: 2rem;
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       text-transform: uppercase;
     }
 
     label {
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-weight: 600;
       font-size: 1.1rem;
-      color: var(--primary-color);
     }
 
     input, select, button {
@@ -62,7 +68,6 @@
       margin: 10px 0;
       border-radius: var(--border-radius);
       font-size: 1rem;
-      border: 1px solid #ccc;
       box-sizing: border-box;
       transition: all 0.3s ease;
     }
@@ -74,72 +79,137 @@
 
     button[type="button"], button[type="submit"] {
       background-color: var(--button-color);
-      color: white;
-      border: none;
+      color: var(--secondary-color);
+      border: 1px solid #D1D5DB;
       cursor: pointer;
       font-weight: bold;
       transition: background-color 0.3s ease;
-      padding: var(--button-padding);
-      margin-top: 20px;
-      border-radius: var(--border-radius);
     }
 
     button[type="button"]:hover, button[type="submit"]:hover {
-      background-color: #16a34a;
+      background-color: var(--accent-color);
+      color: white;
     }
 
-    .forgot-password {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-
-    .forgot-password a {
-      color: var(--primary-color);
-      text-decoration: none;
-    }
-
-    .forgot-password a:hover {
-      text-decoration: underline;
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .loader {
       display: none;
       text-align: center;
       font-weight: bold;
-      color: var(--button-color);
+      color: var(--accent-color);
       margin-top: 20px;
     }
 
+    #total {
+      font-weight: 600;
+      margin-top: 10px;
+      color: var(--primary-color);
+    }
+
+    .entreprise-info {
+      background-color: #F9FAFB;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: var(--border-radius);
+      display: none;
+      transition: all 0.3s ease;
+    }
+
+    .entreprise-info input {
+      margin-bottom: 10px;
+    }
+
+    /* Toast Notification Style */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      top: 50%;
+      font-size: 17px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: visibility 0.5s, opacity 0.5s ease-in-out;
+    }
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
     @media (max-width: 768px) {
-      .login-container {
-        padding: 20px;
+      .container {
+        padding: 15px;
       }
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Styling for copyright */
+    .copyright {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      font-size: 1rem;
+      color: #4B5563;
+      text-align: right;
+      padding: 10px;
+      width: auto;
+    }
+
+    textarea {
+      width: 100%;
+      padding: var(--input-padding);
+      margin: 10px 0;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      box-sizing: border-box;
+      border: 1px solid #D1D5DB;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+      background-color: white;
+      color: #111827;
+      font-family: 'Arial', sans-serif;
+    }
+
+    textarea:focus {
+      outline: none;
+      border: 2px solid var(--primary-color);
     }
   </style>
 </head>
 <body>
-  <div class="login-container" id="loginContainer">
-    <h2>Connexion</h2>
-    <form id="loginForm">
-      <label for="username">Nom d'utilisateur</label>
-      <input type="text" id="username" placeholder="Nom d'utilisateur" required />
-
-      <label for="password">Mot de passe</label>
-      <input type="password" id="password" placeholder="Mot de passe" required />
-
-      <div class="forgot-password">
-        <a href="#">Mot de passe oublié ?</a>
-      </div>
-
-      <button type="submit">Se connecter</button>
-    </form>
+  <!-- Toast Notification -->
+  <div id="toastMessage" class="toast">
+    <p id="toastText"></p>
   </div>
 
-  <div class="container" style="display: none;" id="mainContainer">
+<div class="login-container" id="loginContainer">
+  <h2>Connexion</h2>
+  <input type="text" id="username" placeholder="Nom d'utilisateur" required />
+  <input type="password" id="password" placeholder="Mot de passe" required />
+  <div>
+    <input type="checkbox" id="rememberMe" />
+    <label for="rememberMe">Se souvenir de moi</label>
+  </div>
+  <button onclick="verifierLogin()">Se connecter</button>
+</div>
+
+<div class="container" style="display: none;" id="mainContainer">
     <h2>Création de Facture</h2>
-    <button onclick="deconnexion()">🔒 Déconnexion</button>
-    <!-- Formulaire pour la création de la facture -->
+  <button onclick="deconnexion()">🔒 Déconnexion</button>
     <form id="factureForm">
       <label for="type">Type</label>
       <select name="type" id="type" required>
@@ -147,12 +217,12 @@
         <option value="Devis">Devis</option>
       </select>
 
+      <!-- Champ pour le numéro de facture -->
       <label for="numFacture">Numéro de Facture</label>
       <input type="text" name="numFacture" id="numFacture" required placeholder="Entrez le numéro de la facture" />
 
       <label for="date">Date</label>
       <input type="date" name="date" id="date" required />
-
       <label for="client">Client</label>
       <textarea name="client" id="client" rows="6" required placeholder="Détails relatifs au client..."></textarea>
 
@@ -200,7 +270,7 @@
     <div class="loader" id="loader">Veuillez patienter, la génération de la facture est en cours...</div>
   </div>
 
-  <!-- Copyright Section -->
+<!-- Copyright Section -->
   <div class="copyright">
     <p>&copy; 2025 GetQuick. +212630230803.</p>
   </div>
@@ -229,7 +299,8 @@
     }
 
     let logoImageBase64 = null;
-
+    
+    // Vérifier si l'utilisateur a coché "Remember me" et s'il a des informations sauvegardées
     function verifierLogin() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -240,6 +311,7 @@
         'mounir': '3388'
       };
 
+      // Si les identifiants sont valides
       if (identifiantsValides[username] && identifiantsValides[username] === password) {
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('mainContainer').style.display = 'block';
@@ -248,10 +320,12 @@
         sessionStorage.setItem('connecte', 'true');
         protegerAcces();
 
+        // Si "Remember me" est coché, on stocke les informations dans localStorage
         if (rememberMe) {
           localStorage.setItem('username', username);
           localStorage.setItem('password', password);
         } else {
+          // Si "Remember me" n'est pas coché, on efface les données stockées (si présentes)
           localStorage.removeItem('username');
           localStorage.removeItem('password');
         }
@@ -260,6 +334,7 @@
       }
     }
 
+    // Lors du chargement de la page, vérifier si les données sont déjà stockées
     window.onload = function() {
       const savedUsername = localStorage.getItem('username');
       const savedPassword = localStorage.getItem('password');
@@ -268,7 +343,7 @@
         document.getElementById('password').value = savedPassword;
         document.getElementById('rememberMe').checked = true;
       }
-      protegerAcces();
+      protegerAcces(); // <--- ajoute ceci ici
     };
 
     function chargerLogo(event) {
@@ -361,13 +436,15 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
+      // Ajout du logo en haut à gauche
       if (logoImageBase64) {
         doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
       }
 
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
 
-      let titleYPos = 40; 
+      // Crée un saut de 4 lignes après le logo
+      let titleYPos = 40; // Position après 4 lignes de saut (environ 10mm par ligne)
       doc.setFontSize(30);
       doc.setFont("helvetica", "bold");
       doc.text(title, 105, titleYPos, { align: "center" });
