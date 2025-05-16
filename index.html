@@ -19,10 +19,11 @@
       --button-padding: 15px;
     }
 
+  
+/* Taille minimale de police pour éviter le zoom sur les champs de texte */
     input, select, textarea {
       font-size: 16px;
     }
-
     body {
       font-family: 'Arial', sans-serif;
       background-color: var(--background-color);
@@ -35,7 +36,6 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
     .container {
       background-color: white;
       border-radius: var(--border-radius);
@@ -46,7 +46,6 @@
       box-sizing: border-box;
       margin: 0 15px;
     }
-
     h2 {
       color: var(--primary-color);
       font-size: 2rem;
@@ -54,14 +53,12 @@
       margin-bottom: 20px;
       text-transform: uppercase;
     }
-
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
       font-size: 1.1rem;
     }
-
     input, select, button {
       width: 100%;
       padding: var(--input-padding);
@@ -71,12 +68,10 @@
       box-sizing: border-box;
       transition: all 0.3s ease;
     }
-
     input:focus, select:focus {
       outline: none;
       border: 2px solid var(--primary-color);
     }
-
     button[type="button"], button[type="submit"] {
       background-color: var(--button-color);
       color: var(--secondary-color);
@@ -85,18 +80,15 @@
       font-weight: bold;
       transition: background-color 0.3s ease;
     }
-
     button[type="button"]:hover, button[type="submit"]:hover {
       background-color: var(--accent-color);
       color: white;
     }
-
     .button-group {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-
     .loader {
       display: none;
       text-align: center;
@@ -104,13 +96,11 @@
       color: var(--accent-color);
       margin-top: 20px;
     }
-
     #total {
       font-weight: 600;
       margin-top: 10px;
       color: var(--primary-color);
     }
-
     .entreprise-info {
       background-color: #F9FAFB;
       padding: 15px;
@@ -119,7 +109,6 @@
       display: none;
       transition: all 0.3s ease;
     }
-
     .entreprise-info input {
       margin-bottom: 10px;
     }
@@ -156,18 +145,128 @@
         font-size: 1.5rem;
       }
     }
-
     /* Styling for copyright */
-    .copyright {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      font-size: 1rem;
-      color: #4B5563;
-      text-align: right;
-      padding: 10px;
-      width: auto;
-    }
+.copyright {
+  position: fixed;    /* Fixe l'élément en bas de la page */
+  bottom: 0;          /* Place le texte en bas */
+  right: 0;           /* Aligne le texte à droite */
+  font-size: 1rem;    /* Taille du texte */
+  color: #4B5563;     /* Couleur du texte */
+  text-align: right;  /* Aligne le texte à droite à l'intérieur de l'élément */
+  padding: 10px;      /* Espacement autour du texte */
+  width: auto;        /* Ajuste la largeur en fonction du texte */
+}
+
+// Variables de couleur
+$secondary-color: #4B5563;
+$accent-color: #10B981;
+$background-color: #F3F4F6;
+$white: #fff;
+
+// Variables de mise en page
+$padding: 30px;
+$border-radius: 10px;
+$max-width: 400px;
+$box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+// Mixins pour la réutilisation
+@mixin center-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Style du conteneur principal de login */
+.login-container {
+  background-color: #fff;
+  border-radius: 8px; /* Bordures arrondies */
+  padding: 20px; /* Espacement interne */
+  max-width: 400px; /* Largeur maximale */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre douce */
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  margin: 50px auto; /* Centrer le conteneur */
+  justify-content: center; /* Centrer verticalement */
+  align-items: center; /* Centrer horizontalement */
+}
+
+/* Titre de l'interface */
+h2 {
+  font-size: 2rem;
+  color: #2c3e50; /* Couleur de texte foncé */
+  margin-bottom: 20px;
+}
+
+/* Styles pour les champs de saisie */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px; /* Bordures arrondies */
+  border: 1px solid #ddd; /* Bordure légère */
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border: 2px solid #3498db; /* Bordure bleue au focus */
+}
+
+/* Style pour le label "Se souvenir de moi" */
+div {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centrer horizontalement le label et la case à cocher */
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 0.9rem;
+  color: #7f8c8d; /* Couleur de texte plus claire */
+  margin-left: 8px;
+}
+
+/* Bouton de connexion */
+button {
+  width: 100%;
+  padding: 14px;
+  background-color: #3498db; /* Couleur de fond bleue */
+  color: #fff; /* Texte blanc */
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #2980b9; /* Changement de couleur au survol */
+}
+
+button:active {
+  background-color: #1c5980; /* Couleur plus foncée au clic */
+}
+
+/* Style pour l'élément checkbox */
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+
+// Styles pour la section "footer"
+footer {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: $secondary-color;
+  font-size: 0.8rem;
+}
 
     textarea {
       width: 100%;
@@ -188,6 +287,7 @@
       outline: none;
       border: 2px solid var(--primary-color);
     }
+
   </style>
 </head>
 <body>
