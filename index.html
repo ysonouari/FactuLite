@@ -523,15 +523,6 @@ function chargerLogo(event) {
       doc.text(`TVA (${factureData.tva}%) : ${tva.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 30);
       doc.text(`Total TTC : ${totalTTC.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 40);
 
-      // Footer with company info
-      if (entrepriseInfo) {
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        if (entrepriseInfo.nom) {
-          doc.text(`${entrepriseInfo.nom} | ${entrepriseInfo.contact}`, 14, doc.internal.pageSize.height - 20);
-        }
-      }
-
       // Save PDF
       doc.save(`${factureData.client}_facture.pdf`);
     };
