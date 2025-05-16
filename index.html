@@ -8,165 +8,145 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
-     :root {
-  --primary-color: #1E40AF;
-  --secondary-color: #4B5563;
-  --background-color: #F3F4F6;
-  --accent-color: #10B981;
-  --button-color: #F3F4F6;
-  --border-radius: 10px;
-  --input-padding: 12px;
-  --button-padding: 15px;
-  --input-focus-border: #1E40AF;
-  --button-hover-bg: #4B5563;
-}
+    :root {
+      --primary-color: #1E40AF;
+      --secondary-color: #4B5563;
+      --background-color: #F3F4F6;
+      --accent-color: #10B981;
+      --button-color: #F3F4F6;
+      --border-radius: 10px;
+      --input-padding: 12px;
+      --button-padding: 15px;
+    }
 
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: var(--background-color);
-  color: var(--secondary-color);
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  overflow: hidden;
-}
+    input, select, textarea {
+      font-size: 16px;
+    }
 
-/* Conteneur de connexion avec animation d'apparition */
-.login-container {
-  width: 100%;
-  max-width: 400px;
-  background-color: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  margin: 0 15px;
-  transition: transform 0.5s ease-out;
-  animation: fadeIn 1s ease-out;
-}
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--background-color);
+      color: var(--secondary-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    .container {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 800px;
+      box-sizing: border-box;
+      margin: 0 15px;
+    }
 
-/* Style du titre */
-.login-container h2 {
-  color: var(--primary-color);
-  font-size: 24px;
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: bold;
-  text-transform: uppercase;
-}
+    h2 {
+      color: var(--primary-color);
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
 
-/* Champs de saisie */
-input[type="text"], input[type="password"] {
-  width: 100%;
-  padding: var(--input-padding);
-  margin: 10px 0;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  transition: border 0.3s ease;
-}
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
 
-input[type="text"]:focus, input[type="password"]:focus {
-  outline: none;
-  border: 2px solid var(--input-focus-border);
-}
+    input, select, button {
+      width: 100%;
+      padding: var(--input-padding);
+      margin: 10px 0;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
 
-/* Case "Se souvenir de moi" */
-input[type="checkbox"] {
-  margin-right: 10px;
-}
+    input:focus, select:focus {
+      outline: none;
+      border: 2px solid var(--primary-color);
+    }
 
-/* Bouton de connexion */
-button {
-  width: 100%;
-  padding: var(--button-padding);
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 10px;
-}
+    button[type="button"], button[type="submit"] {
+      background-color: var(--button-color);
+      color: var(--secondary-color);
+      border: 1px solid #D1D5DB;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
 
-button:hover {
-  background-color: var(--button-hover-bg);
-}
+    button[type="button"]:hover, button[type="submit"]:hover {
+      background-color: var(--accent-color);
+      color: white;
+    }
 
-button:active {
-  transform: scale(0.98);
-}
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-/* Animations et transitions */
-input, button {
-  transition: all 0.3s ease-in-out;
-}
+    .loader {
+      display: none;
+      text-align: center;
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-top: 20px;
+    }
 
-input:focus, button:focus {
-  border: 2px solid var(--primary-color);
-}
+    #total {
+      font-weight: 600;
+      margin-top: 10px;
+      color: var(--primary-color);
+    }
 
-/* Espacement et padding */
-.container {
-  padding: 20px;
-}
+    .entreprise-info {
+      background-color: #F9FAFB;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: var(--border-radius);
+      display: none;
+      transition: all 0.3s ease;
+    }
 
-/* Responsivité */
-@media (max-width: 768px) {
-  .login-container {
-    padding: 20px;
-  }
+    .entreprise-info input {
+      margin-bottom: 10px;
+    }
 
-  h2 {
-    font-size: 20px;
-  }
+    /* Toast Notification Style */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      top: 50%;
+      font-size: 17px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: visibility 0.5s, opacity 0.5s ease-in-out;
+    }
 
-  button {
-    padding: 12px;
-    font-size: 14px;
-  }
-}
-
-/* Toast Notification */
-.toast {
-  visibility: hidden;
-  min-width: 250px;
-  margin-left: -125px;
-  background-color: #4CAF50;
-  color: white;
-  text-align: center;
-  border-radius: 2px;
-  padding: 16px;
-  position: fixed;
-  z-index: 1;
-  left: 50%;
-  top: 50%;
-  font-size: 17px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  transition: visibility 0.5s, opacity 0.5s ease-in-out;
-}
-
-.toast.show {
-  visibility: visible;
-  opacity: 1;
-}
-
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
 
     @media (max-width: 768px) {
       .container {
