@@ -19,10 +19,10 @@
       --button-padding: 15px;
     }
 
-    /* Taille minimale de police pour éviter le zoom sur les champs de texte */
     input, select, textarea {
       font-size: 16px;
     }
+
     body {
       font-family: 'Arial', sans-serif;
       background-color: var(--background-color);
@@ -35,6 +35,7 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+
     .container {
       background-color: white;
       border-radius: var(--border-radius);
@@ -45,6 +46,7 @@
       box-sizing: border-box;
       margin: 0 15px;
     }
+
     h2 {
       color: var(--primary-color);
       font-size: 2rem;
@@ -52,12 +54,14 @@
       margin-bottom: 20px;
       text-transform: uppercase;
     }
+
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
       font-size: 1.1rem;
     }
+
     input, select, button {
       width: 100%;
       padding: var(--input-padding);
@@ -67,10 +71,12 @@
       box-sizing: border-box;
       transition: all 0.3s ease;
     }
+
     input:focus, select:focus {
       outline: none;
       border: 2px solid var(--primary-color);
     }
+
     button[type="button"], button[type="submit"] {
       background-color: var(--button-color);
       color: var(--secondary-color);
@@ -79,15 +85,18 @@
       font-weight: bold;
       transition: background-color 0.3s ease;
     }
+
     button[type="button"]:hover, button[type="submit"]:hover {
       background-color: var(--accent-color);
       color: white;
     }
+
     .button-group {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+
     .loader {
       display: none;
       text-align: center;
@@ -95,11 +104,13 @@
       color: var(--accent-color);
       margin-top: 20px;
     }
+
     #total {
       font-weight: 600;
       margin-top: 10px;
       color: var(--primary-color);
     }
+
     .entreprise-info {
       background-color: #F9FAFB;
       padding: 15px;
@@ -108,6 +119,7 @@
       display: none;
       transition: all 0.3s ease;
     }
+
     .entreprise-info input {
       margin-bottom: 10px;
     }
@@ -147,14 +159,14 @@
 
     /* Styling for copyright */
     .copyright {
-      position: fixed;    /* Fixe l'élément en bas de la page */
-      bottom: 0;          /* Place le texte en bas */
-      right: 0;           /* Aligne le texte à droite */
-      font-size: 1rem;    /* Taille du texte */
-      color: #4B5563;     /* Couleur du texte */
-      text-align: right;  /* Aligne le texte à droite à l'intérieur de l'élément */
-      padding: 10px;      /* Espacement autour du texte */
-      width: auto;        /* Ajuste la largeur en fonction du texte */
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      font-size: 1rem;
+      color: #4B5563;
+      text-align: right;
+      padding: 10px;
+      width: auto;
     }
 
     textarea {
@@ -176,7 +188,6 @@
       outline: none;
       border: 2px solid var(--primary-color);
     }
-
   </style>
 </head>
 <body>
@@ -245,7 +256,7 @@
         <button type="button" id="btnTelecharger" disabled>📥 Télécharger PDF</button>
         <button type="button" onclick="reinitialiserFormulaire()">🆕 Nouvelle facture</button>
         <label for="logoUpload">📷 Ajouter un logo</label>
-  <input type="file" id="logoUpload" accept="image/*" onchange="chargerLogo(event)" />
+        <input type="file" id="logoUpload" accept="image/*" onchange="chargerLogo(event)" />
       </div>
     </form>
     <div class="button-group">
@@ -265,7 +276,6 @@
   </div>
 
   <script>
-
     // Fonction pour afficher la notification Toast
     function afficherToast(message) {
       const toast = document.getElementById('toastMessage');
@@ -278,83 +288,82 @@
     }
 
     function protegerAcces() {
-  const estConnecte = sessionStorage.getItem('connecte');
-  if (!estConnecte) {
-    document.getElementById('mainContainer').style.display = 'none';
-    document.getElementById('loginContainer').style.display = 'flex';
-  } else {
-    document.getElementById('loginContainer').style.display = 'none';
-    document.getElementById('mainContainer').style.display = 'block';
-  }
-}
-
-  let logoImageBase64 = null;
-  
-// Vérifier si l'utilisateur a coché "Remember me" et s'il a des informations sauvegardées
-function verifierLogin() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const rememberMe = document.getElementById('rememberMe').checked;
-
-  const identifiantsValides = {
-    'demo': '3388',
-    'mounir': '3388'
-  };
-
-  // Si les identifiants sont valides
-  if (identifiantsValides[username] && identifiantsValides[username] === password) {
-    document.getElementById('loginContainer').style.display = 'none';
-    document.getElementById('mainContainer').style.display = 'block';
-    afficherToast("Connexion réussie !");
-
-sessionStorage.setItem('connecte', 'true');
-protegerAcces();
-
-    // Si "Remember me" est coché, on stocke les informations dans localStorage
-    if (rememberMe) {
-      localStorage.setItem('username', username);
-      localStorage.setItem('password', password);
-    } else {
-      // Si "Remember me" n'est pas coché, on efface les données stockées (si présentes)
-      localStorage.removeItem('username');
-      localStorage.removeItem('password');
+      const estConnecte = sessionStorage.getItem('connecte');
+      if (!estConnecte) {
+        document.getElementById('mainContainer').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'flex';
+      } else {
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('mainContainer').style.display = 'block';
+      }
     }
-  } else {
-    afficherToast("Nom d'utilisateur ou mot de passe incorrect.");
-  }
-}
 
-// Lors du chargement de la page, vérifier si les données sont déjà stockées
-window.onload = function() {
-  const savedUsername = localStorage.getItem('username');
-  const savedPassword = localStorage.getItem('password');
-  if (savedUsername && savedPassword) {
-    document.getElementById('username').value = savedUsername;
-    document.getElementById('password').value = savedPassword;
-    document.getElementById('rememberMe').checked = true;
-  }
-    protegerAcces(); // <--- ajoute ceci ici
-};
-function chargerLogo(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+    let logoImageBase64 = null;
+    
+    // Vérifier si l'utilisateur a coché "Remember me" et s'il a des informations sauvegardées
+    function verifierLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const rememberMe = document.getElementById('rememberMe').checked;
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    logoImageBase64 = e.target.result;
-    afficherToast("Logo chargé avec succès !");
-  };
-  reader.readAsDataURL(file);
-}
+      const identifiantsValides = {
+        'demo': '3388',
+        'mounir': '3388'
+      };
 
-    // Lorsque l'utilisateur enregistre les informations de l'entreprise
+      // Si les identifiants sont valides
+      if (identifiantsValides[username] && identifiantsValides[username] === password) {
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('mainContainer').style.display = 'block';
+        afficherToast("Connexion réussie !");
+
+        sessionStorage.setItem('connecte', 'true');
+        protegerAcces();
+
+        // Si "Remember me" est coché, on stocke les informations dans localStorage
+        if (rememberMe) {
+          localStorage.setItem('username', username);
+          localStorage.setItem('password', password);
+        } else {
+          // Si "Remember me" n'est pas coché, on efface les données stockées (si présentes)
+          localStorage.removeItem('username');
+          localStorage.removeItem('password');
+        }
+      } else {
+        afficherToast("Nom d'utilisateur ou mot de passe incorrect.");
+      }
+    }
+
+    // Lors du chargement de la page, vérifier si les données sont déjà stockées
+    window.onload = function() {
+      const savedUsername = localStorage.getItem('username');
+      const savedPassword = localStorage.getItem('password');
+      if (savedUsername && savedPassword) {
+        document.getElementById('username').value = savedUsername;
+        document.getElementById('password').value = savedPassword;
+        document.getElementById('rememberMe').checked = true;
+      }
+      protegerAcces(); // <--- ajoute ceci ici
+    };
+
+    function chargerLogo(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        logoImageBase64 = e.target.result;
+        afficherToast("Logo chargé avec succès !");
+      };
+      reader.readAsDataURL(file);
+    }
+
     function enregistrerEntreprise() {
       const entrepriseInfo = {
         nom: document.getElementById('nomEntreprise').value
       };
       localStorage.setItem('entrepriseInfo', JSON.stringify(entrepriseInfo));
-      
-      // Affichage du message de confirmation
+
       afficherToast("Information enregistrée avec succès !");
     }
 
@@ -402,6 +411,7 @@ function chargerLogo(event) {
         tva: form.tva.value,
         lignes: []
       };
+
       const rows = document.getElementById('lignesTable').getElementsByTagName('tbody')[0].rows;
       for (let row of rows) {
         const nom = row.cells[0].querySelector('input').value.trim();
@@ -410,11 +420,11 @@ function chargerLogo(event) {
         if (!nom || isNaN(prix) || isNaN(qte)) continue;
         data.lignes.push({ nom, prix, qte });
       }
+
       const entrepriseInfo = JSON.parse(localStorage.getItem('entrepriseInfo'));
       if (entrepriseInfo) data.entreprise = entrepriseInfo;
       localStorage.setItem('factureData', JSON.stringify(data));
-      
-      // Afficher la notification de succès
+
       afficherToast("Facture générée avec succès !");
       document.getElementById('btnTelecharger').disabled = false;
     };
@@ -422,37 +432,26 @@ function chargerLogo(event) {
     document.getElementById('btnTelecharger').onclick = function() {
       const factureData = JSON.parse(localStorage.getItem('factureData'));
       if (!factureData) return;
+
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Si un logo a été chargé, on l'ajoute en haut à gauche
+      // Ajout du logo en haut à gauche
       if (logoImageBase64) {
         doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
       }
 
-      // Dynamic Title: Based on "Devis" or "Facture"
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
-      doc.setFontSize(30);  // Increased font size for the title
-      doc.setFont("helvetica", "bold");  // Bold title
+      doc.setFontSize(30);
+      doc.setFont("helvetica", "bold");
       doc.text(title, 105, 20, { align: "center" });
 
-      // Afficher le numéro de la facture
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
-      doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, 40);  // Position sous le titre
+      doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, 40);
+      const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
+      doc.text(`${dateLabel} : ${factureData.date}`, 14, 35);
 
-      // Date placée en haut à gauche
-const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
-doc.setFontSize(12);
-doc.setFont("helvetica", "normal");
-doc.text(
-  `${dateLabel} : ${factureData.date}`,
-  14,  // 14 mm de la marge gauche
-  35   // 30 mm du haut
-);
-
-
-      // Informations client
       const lignesClient = factureData.client.split('\n').filter(l => l.trim() !== '');
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
@@ -472,7 +471,6 @@ doc.text(
         yPos += ligneHeight;
       });
 
-      // Informations sur le vendeur
       const entrepriseInfo = JSON.parse(localStorage.getItem('entrepriseInfo'));
       if (entrepriseInfo) {
         doc.setFont("helvetica", "bold");
@@ -493,7 +491,6 @@ doc.text(
         });
       }
 
-      // Table Header
       doc.autoTable({
         startY: yPos + 10,
         head: [['Description', `Prix Unitaire (${factureData.devise})`, 'Quantité', `Total (${factureData.devise})`]], 
@@ -501,7 +498,7 @@ doc.text(
           ligne.nom, 
           `${ligne.prix.toFixed(2)} ${factureData.devise}`, 
           ligne.qte,  
-          `${(ligne.prix * ligne.qte).toFixed(2)} ${factureData.devise}`  
+          `${(ligne.prix * ligne.qte).toFixed(2)} ${factureData.devise}`
         ]),
         styles: { 
           cellPadding: 4,
@@ -515,7 +512,6 @@ doc.text(
         tableWidth: 'auto',
       });
 
-      // Total Calculation
       const totalHT = factureData.lignes.reduce((acc, ligne) => acc + (ligne.prix * ligne.qte), 0);
       const tva = totalHT * (factureData.tva / 100);
       const totalTTC = totalHT + tva;
@@ -524,7 +520,6 @@ doc.text(
       doc.text(`TVA (${factureData.tva}%) : ${tva.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 30);
       doc.text(`Total TTC : ${totalTTC.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 40);
 
-      // Save PDF
       doc.save(`${factureData.client}_facture.pdf`);
     };
 
@@ -533,15 +528,6 @@ doc.text(
       form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
     }
 
-    function enregistrerEntreprise() {
-      const entrepriseInfo = {
-        nom: document.getElementById('nomEntreprise').value
-      };
-      localStorage.setItem('entrepriseInfo', JSON.stringify(entrepriseInfo));
-      
-      // Affichage du message de confirmation
-      afficherToast("Information enregistrée avec succès !");
-    }
     function deconnexion() {
       sessionStorage.removeItem('connecte');
       localStorage.removeItem('username');
@@ -558,8 +544,8 @@ doc.text(
       ajouterLigne();
       mettreAJourTotaux();
     }
+
     mettreAJourTotaux();
-    
   </script>
 </body>
 </html>
