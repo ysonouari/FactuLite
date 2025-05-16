@@ -19,6 +19,7 @@
       --button-padding: 15px;
     }
 
+    /* Taille minimale de police pour éviter le zoom sur les champs de texte */
     input, select, textarea {
       font-size: 16px;
     }
@@ -278,7 +279,6 @@
   </div>
 
   <script>
-
     function afficherToast(message) {
       const toast = document.getElementById('toastMessage');
       const toastText = document.getElementById('toastText');
@@ -303,7 +303,6 @@
       reader.readAsDataURL(file);
     }
 
-    // Fonction pour vérifier l'accès utilisateur
     function protegerAcces() {
       const estConnecte = sessionStorage.getItem('connecte');
       if (!estConnecte) {
@@ -315,7 +314,6 @@
       }
     }
 
-    // Vérification des identifiants de connexion
     function verifierLogin() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -353,7 +351,7 @@
         document.getElementById('password').value = savedPassword;
         document.getElementById('rememberMe').checked = true;
       }
-      protegerAcces(); // <--- ajoute ceci ici
+      protegerAcces();
     };
 
     function enregistrerEntreprise() {
@@ -433,7 +431,7 @@
         doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30);
       }
 
-      let yPos = 45;  // Initial Y position for text after logo
+      let yPos = 45;
 
       const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
       doc.setFontSize(30);
