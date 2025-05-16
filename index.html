@@ -675,7 +675,7 @@
   // Ajouter la note au PDF en bas après la table
   const note = document.getElementById('note').value || "";
   if (note) {
-    yPos = finalY + 35; // Positionner la note en bas de la table
+    yPos = finalY + 50; // Positionner la note en bas de la table
     doc.setFontSize(12);
     doc.text("Note :", 14, yPos);
     yPos += 6;
