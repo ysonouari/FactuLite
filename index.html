@@ -376,14 +376,32 @@ footer {
   </div>
 
   <script>
-    // Ajouter CryptoJS pour le chiffrement
-const secretKey = 'secret-key'; // Utilisez une clé secrète pour le chiffrement
+    // Générer une clé plus sécurisée de manière dynamique (cela pourrait venir d'un serveur)
+function generateSecureKey() {
+  return window.crypto.getRandomValues(new Uint8Array(32)); // Clé de 256 bits
+}
+
+// Chiffrement/déchiffrement amélioré
+function encryptData(data) {
+  const key = generateSecureKey();
+  return CryptoJS.AES.encrypt(data, key).toString();
+}
+
+function decryptData(encryptedData) {
+  const key = generateSecureKey();
+  return CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
+}
 
 // Fonction pour afficher la notification Toast
-function afficherToast(message) {
+function afficherToast(message, type = 'success') {
   const toast = document.getElementById('toastMessage');
   const toastText = document.getElementById('toastText');
   toastText.textContent = message;
+  
+  // Ajouter des classes selon le type (succès, erreur)
+  toast.classList.remove('success', 'error');
+  toast.classList.add(type);
+  
   toast.classList.add('show');
   setTimeout(() => {
     toast.classList.remove('show');
@@ -393,8 +411,7 @@ function afficherToast(message) {
 function protegerAcces() {
   const estConnecte = sessionStorage.getItem('connecte');
   if (!estConnecte) {
-    document.getElementById('mainContainer').style.display = 'none';
-    document.getElementById('loginContainer').style.display = 'flex';
+    window.location.href = "/login"; // Redirection vers la page de connexion si non connecté
   } else {
     document.getElementById('loginContainer').style.display = 'none';
     document.getElementById('mainContainer').style.display = 'block';
@@ -437,7 +454,7 @@ function verifierLogin() {
       localStorage.removeItem('loginTime');
     }
   } else {
-    afficherToast("Nom d'utilisateur ou mot de passe incorrect.");
+    afficherToast("Nom d'utilisateur ou mot de passe incorrect.", 'error');
   }
 }
 
@@ -499,6 +516,23 @@ function ajouterLigne() {
     <td><input type="number" name="prix" step="0.01" required oninput="mettreAJourTotaux()"></td>
     <td><input type="number" name="quantite" required oninput="mettreAJourTotaux()"></td>
     <td><button type="button" onclick="supprimerLigne(this)">Supprimer</button></td>`;
+
+  // Validation pour chaque entrée ajoutée
+  row.querySelector('input[name="prix"]').addEventListener('blur', function () {
+    const prix = parseFloat(this.value);
+    if (prix <= 0) {
+      afficherToast("Le prix doit être supérieur à 0.", 'error');
+      this.focus();
+    }
+  });
+
+  row.querySelector('input[name="quantite"]').addEventListener('blur', function () {
+    const quantite = parseInt(this.value);
+    if (quantite <= 0) {
+      afficherToast("La quantité doit être supérieure à 0.", 'error');
+      this.focus();
+    }
+  });
 }
 
 function supprimerLigne(btn) {
@@ -556,71 +590,34 @@ document.getElementById('factureForm').onsubmit = function (event) {
 
 document.getElementById('btnTelecharger').onclick = function () {
   const factureData = JSON.parse(localStorage.getItem('factureData'));
-  if (!factureData) return;
+  if (factureData) {
+    genererFacturePDF(factureData);
+  }
+};
 
+function genererFacturePDF(factureData) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   // Ajout du logo en haut à gauche
   if (logoImageBase64) {
-    doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30); // x, y, largeur, hauteur
+    doc.addImage(logoImageBase64, 'PNG', 10, 6, 30, 30);
   }
 
   const title = factureData.type === "Facture" ? "FACTURE" : "DEVIS";
-
-  // Crée un saut de 4 lignes après le logo
-  let titleYPos = 40; // Position après 4 lignes de saut (environ 10mm par ligne)
   doc.setFontSize(30);
   doc.setFont("helvetica", "bold");
-  doc.text(title, 105, titleYPos, { align: "center" });
+  doc.text(title, 105, 40, { align: "center" });
 
+  // Autres informations de facture
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
-  doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, titleYPos + 10);
+  doc.text(`Numéro de Facture : ${factureData.numFacture}`, 14, 50);
   const dateLabel = factureData.type === "Facture" ? "Date de la facture" : "Date de devis";
-  doc.text(`${dateLabel} : ${factureData.date}`, 14, titleYPos + 15);
-
-  const lignesClient = factureData.client.split('\n').filter(l => l.trim() !== '');
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("Informations client :", 14, titleYPos + 25);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-
-  let yPos = titleYPos + 35;
-  const ligneHeight = 6;
-  lignesClient.forEach(ligne => {
-    if (yPos > 270) {
-      doc.addPage();
-      yPos = 20;
-    }
-    doc.text(ligne, 20, yPos);
-    yPos += ligneHeight;
-  });
-
-  const entrepriseInfo = JSON.parse(localStorage.getItem('entrepriseInfo'));
-  if (entrepriseInfo) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("Informations sur le vendeur :", 14, yPos + 10);
-    yPos += 20;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    const lignesEntreprise = entrepriseInfo.nom.split('\n').filter(l => l.trim() !== '');
-    lignesEntreprise.forEach(ligne => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.text(ligne, 20, yPos);
-      yPos += ligneHeight;
-    });
-  }
+  doc.text(`${dateLabel} : ${factureData.date}`, 14, 55);
 
   doc.autoTable({
-    startY: yPos + 10,
+    startY: 60,
     head: [['Description', `Prix Unitaire (${factureData.devise})`, 'Quantité', `Total (${factureData.devise})`]], 
     body: factureData.lignes.map(ligne => [
       ligne.nom, 
@@ -637,7 +634,6 @@ document.getElementById('btnTelecharger').onclick = function () {
     },
     theme: 'grid',
     margin: { top: 10, bottom: 20 },
-    tableWidth: 'auto',
   });
 
   const totalHT = factureData.lignes.reduce((acc, ligne) => acc + (ligne.prix * ligne.qte), 0);
@@ -649,7 +645,7 @@ document.getElementById('btnTelecharger').onclick = function () {
   doc.text(`Total TTC : ${totalTTC.toFixed(2)} ${factureData.devise}`, 14, doc.lastAutoTable.finalY + 40);
 
   doc.save(`${factureData.client}_facture.pdf`);
-};
+}
 
 function afficherFormEntreprise() {
   const form = document.getElementById('entrepriseInfoForm');
@@ -675,6 +671,7 @@ function reinitialiserFormulaire() {
 }
 
 mettreAJourTotaux();
+
 
   </script>
 </body>
