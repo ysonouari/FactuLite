@@ -633,9 +633,35 @@
           vendorInfoForm.classList.toggle("hidden");
         });
         saveVendorInfoBtn.addEventListener("click", function () {
-          // Save vendor info logic would go here
+          const companyName = document.getElementById("company-name").value;
+          const companyAddress = document.getElementById("company-address").value;
+          const taxId = document.getElementById("tax-id").value;
+          const contactInfo = document.getElementById("contact-info").value;
+          // Update display values
+          vendorInfoDisplay.querySelector("p:nth-child(2)").textContent = companyName;
+          vendorInfoDisplay.querySelector(
+            "div:nth-child(2) p:nth-child(2)",
+          ).textContent = companyAddress;
+          vendorInfoDisplay.querySelector(
+            "div:nth-child(3) p:nth-child(2)",
+          ).textContent = taxId;
+          vendorInfoDisplay.querySelector(
+            "div:nth-child(4) p:nth-child(2)",
+          ).textContent = contactInfo;
           vendorInfoDisplay.classList.remove("hidden");
           vendorInfoForm.classList.add("hidden");
+          // Show success notification
+          const notification = document.createElement("div");
+          notification.className =
+            "fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center bg-green-500 text-white";
+          notification.innerHTML = `
+      <div class="w-5 h-5 flex items-center justify-center mr-2">
+      <i class="ri-checkbox-circle-line"></i>
+      </div>
+      <span>Informations du vendeur mises à jour</span>
+      `;
+          document.body.appendChild(notification);
+          setTimeout(() => notification.remove(), 3000);
         });
         // Currency Selector
         const currencySelector = document.getElementById("currency-selector");
@@ -817,84 +843,378 @@
             // Save PDF
             doc.save("facture.pdf");
           });
-        // Download Button (placeholder)
+        // Download Button
         document
           .getElementById("download-btn")
           .addEventListener("click", function () {
-            alert("Download functionality would be implemented here.");
+            const invoiceData = {
+              invoiceNumber: document.getElementById("invoice-number").value,
+              date: document.getElementById("invoice-date").value,
+              currency: document
+                .getElementById("currency-selector")
+                .querySelector("span").textContent,
+              vatRate: document.getElementById("vat-rate").value,
+              client: {
+                name: document.getElementById("client-name").value,
+                address: document.getElementById("client-address").value,
+                contact: document.getElementById("client-contact").value,
+                taxId: document.getElementById("client-tax-id").value,
+              },
+              items: Array.from(document.querySelectorAll("#invoice-items tr")).map(
+                (row) => ({
+                  designation: row.querySelector(".item-designation").value,
+                  price: row.querySelector(".item-price").value,
+                  quantity: row.querySelector(".item-quantity").value,
+                  subtotal: row.querySelector(".item-subtotal").textContent,
+                }),
+              ),
+              totals: {
+                totalHt: document.getElementById("total-ht").textContent,
+                totalVat: document.getElementById("total-vat").textContent,
+                totalTtc: document.getElementById("total-ttc").textContent,
+              },
+            };
+            const dataStr = JSON.stringify(invoiceData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `facture_${invoiceData.invoiceNumber}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            // Show success notification
+            const notification = document.createElement("div");
+            notification.className =
+              "fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center bg-green-500 text-white";
+            notification.innerHTML = `
+      <div class="w-5 h-5 flex items-center justify-center mr-2">
+      <i class="ri-checkbox-circle-line"></i>
+      </div>
+      <span>Facture téléchargée avec succès</span>
+      `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
           });
         // Google Sheets Integration
         document
           .getElementById("google-sheets-btn")
-          .addEventListener("click", async function () {
-            const CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
-            const API_KEY = "YOUR_GOOGLE_API_KEY";
-            const DISCOVERY_DOCS = [
-              "https://sheets.googleapis.com/$discovery/rest?version=v4",
-            ];
-            const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
-            try {
-              await gapi.client.init({
-                apiKey: API_KEY,
-                clientId: CLIENT_ID,
-                discoveryDocs: DISCOVERY_DOCS,
-                scope: SCOPES,
+          .addEventListener("click", function () {
+            const modal = document.createElement("div");
+            modal.className =
+              "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+            modal.innerHTML = `
+      <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+      <div class="text-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">Connexion Google requise</h3>
+      <p class="text-gray-600">Pour sauvegarder sur Google Sheets, veuillez vous connecter à votre compte Google</p>
+      </div>
+      <div class="flex flex-col items-center">
+      <button id="google-auth-btn" class="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-button flex items-center hover:bg-gray-50 !rounded-button whitespace-nowrap">
+      <div class="w-5 h-5 flex items-center justify-center mr-3">
+      <i class="ri-google-fill text-[#4285F4]"></i>
+      </div>
+      <span>Se connecter avec Google</span>
+      </button>
+      <div id="auth-loading" class="hidden flex flex-col items-center mt-4">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+      <span class="text-gray-600">Authentification en cours...</span>
+      </div>
+      </div>
+      </div>
+      `;
+            document.body.appendChild(modal);
+            // Close modal on outside click
+            modal.addEventListener("click", function (e) {
+              if (e.target === modal) {
+                document.body.removeChild(modal);
+              }
+            });
+            const showNotification = (message, type = "success") => {
+              const notification = document.createElement("div");
+              notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center ${type === "success" ? "bg-green-500" : "bg-red-500"} text-white`;
+              const icon = document.createElement("div");
+              icon.className = "w-5 h-5 flex items-center justify-center mr-2";
+              icon.innerHTML =
+                type === "success"
+                  ? '<i class="ri-checkbox-circle-line"></i>'
+                  : '<i class="ri-error-warning-line"></i>';
+              const text = document.createElement("span");
+              text.textContent = message;
+              notification.appendChild(icon);
+              notification.appendChild(text);
+              document.body.appendChild(notification);
+              setTimeout(() => notification.remove(), 3000);
+            };
+            const handleAuth = () => {
+              const CLIENT_ID =
+                "725066377005-qr0vj8ghi7ae0g8rjcmtpjk3v12dqvm4.apps.googleusercontent.com";
+              const API_KEY = "AIzaSyDcIOiB-UVXpPHmwZxE3dEPEyHgLexR_NE";
+              const DISCOVERY_DOCS = [
+                "https://sheets.googleapis.com/$discovery/rest?version=v4",
+                "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
+              ];
+              const SCOPES =
+                "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file";
+              const authBtn = document.getElementById("google-auth-btn");
+              const loadingIndicator = document.getElementById("auth-loading");
+              authBtn.disabled = true;
+              loadingIndicator.classList.remove("hidden");
+              gapi.load("client:auth2", () => {
+                gapi.client
+                  .init({
+                    apiKey: API_KEY,
+                    clientId: CLIENT_ID,
+                    discoveryDocs: DISCOVERY_DOCS,
+                    scope: SCOPES,
+                  })
+                  .then(() => {
+                    const authInstance = gapi.auth2.getAuthInstance();
+                    if (!authInstance.isSignedIn.get()) {
+                      authBtn.disabled = false;
+                      loadingIndicator.classList.add("hidden");
+                      authInstance.isSignedIn.listen((isSignedIn) => {
+                        if (isSignedIn) {
+                          loadingIndicator.classList.remove("hidden");
+                          authBtn.classList.add("hidden");
+                          createAndSaveSpreadsheet().then(() => {
+                            document.body.removeChild(modal);
+                          });
+                        }
+                      });
+                      authBtn.onclick = () => {
+                        loadingIndicator.classList.remove("hidden");
+                        authBtn.classList.add("hidden");
+                        authInstance.signIn();
+                      };
+                    } else {
+                      createAndSaveSpreadsheet().then(() => {
+                        document.body.removeChild(modal);
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error initializing Google API:", error);
+                    showNotification(
+                      "Erreur de connexion à Google. Veuillez réessayer.",
+                      "error",
+                    );
+                    authBtn.disabled = false;
+                    loadingIndicator.classList.add("hidden");
+                  });
               });
-              const auth = await gapi.auth2.getAuthInstance().signIn();
-
-              if (auth) {
-                // Create a new spreadsheet
+            };
+            const createAndSaveSpreadsheet = async () => {
+              try {
+                // Create new spreadsheet
                 const response = await gapi.client.sheets.spreadsheets.create({
                   properties: {
                     title: `Facture ${document.getElementById("invoice-number").value}`,
+                    locale: "fr",
                   },
+                  sheets: [
+                    {
+                      properties: {
+                        title: "Facture",
+                        gridProperties: {
+                          rowCount: 100,
+                          columnCount: 10,
+                        },
+                      },
+                    },
+                  ],
                 });
                 const spreadsheetId = response.result.spreadsheetId;
                 // Prepare invoice data
                 const invoiceData = [
+                  ["FACTURE", "", "", ""],
+                  ["", "", "", ""],
                   [
-                    "Numéro de facture",
+                    "Numéro de facture:",
                     document.getElementById("invoice-number").value,
+                    "",
+                    "",
                   ],
-                  ["Date", document.getElementById("invoice-date").value],
-                  ["Client", document.getElementById("client-name").value],
-                  ["Total HT", document.getElementById("total-ht").textContent],
-                  ["TVA", document.getElementById("total-vat").textContent],
-                  ["Total TTC", document.getElementById("total-ttc").textContent],
+                  ["Date:", document.getElementById("invoice-date").value, "", ""],
+                  ["", "", "", ""],
+                  ["INFORMATIONS CLIENT", "", "", ""],
+                  ["Nom:", document.getElementById("client-name").value, "", ""],
+                  [
+                    "Adresse:",
+                    document.getElementById("client-address").value,
+                    "",
+                    "",
+                  ],
+                  [
+                    "Contact:",
+                    document.getElementById("client-contact").value,
+                    "",
+                    "",
+                  ],
+                  ["TVA ID:", document.getElementById("client-tax-id").value, "", ""],
+                  ["", "", "", ""],
+                  ["ARTICLES", "", "", ""],
+                  ["Désignation", "Prix unitaire", "Quantité", "Sous-total"],
                 ];
-                // Update the spreadsheet
+                // Add items
+                document.querySelectorAll("#invoice-items tr").forEach((row) => {
+                  const designation =
+                    row.querySelector(".item-designation")?.value || "";
+                  const price = row.querySelector(".item-price")?.value || "";
+                  const quantity = row.querySelector(".item-quantity")?.value || "";
+                  const subtotal =
+                    row.querySelector(".item-subtotal")?.textContent || "";
+                  invoiceData.push([designation, price, quantity, subtotal]);
+                });
+                // Add totals
+                invoiceData.push(
+                  ["", "", "", ""],
+                  [
+                    "",
+                    "",
+                    "Total HT:",
+                    document.getElementById("total-ht").textContent,
+                  ],
+                  ["", "", "TVA:", document.getElementById("total-vat").textContent],
+                  [
+                    "",
+                    "",
+                    "Total TTC:",
+                    document.getElementById("total-ttc").textContent,
+                  ],
+                );
+                // Update spreadsheet with data
                 await gapi.client.sheets.spreadsheets.values.update({
                   spreadsheetId: spreadsheetId,
-                  range: "A1:B6",
+                  range: "A1:D" + invoiceData.length,
                   valueInputOption: "USER_ENTERED",
-                  resource: {
-                    values: invoiceData,
-                  },
+                  resource: { values: invoiceData },
                 });
-                // Show success message
-                const successMsg = document.createElement("div");
-                successMsg.className =
-                  "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg";
-                successMsg.textContent =
-                  "Facture sauvegardée sur Google Sheets avec succès!";
-                document.body.appendChild(successMsg);
-                setTimeout(() => successMsg.remove(), 3000);
+                // Format spreadsheet
+                const requests = [
+                  {
+                    updateSpreadsheetProperties: {
+                      properties: {
+                        defaultFormat: {
+                          backgroundColor: { red: 1, green: 1, blue: 1 },
+                          padding: { top: 2, right: 3, bottom: 2, left: 3 },
+                          verticalAlignment: "MIDDLE",
+                          wrapStrategy: "WRAP",
+                          textFormat: {
+                            fontFamily: "Arial",
+                            fontSize: 10,
+                            bold: false,
+                          },
+                        },
+                      },
+                      fields: "defaultFormat",
+                    },
+                  },
+                ];
+                await gapi.client.sheets.spreadsheets.batchUpdate({
+                  spreadsheetId: spreadsheetId,
+                  resource: { requests },
+                });
+                // Get spreadsheet URL
+                const file = await gapi.client.drive.files.get({
+                  fileId: spreadsheetId,
+                  fields: "webViewLink",
+                });
+                showNotification("Facture sauvegardée avec succès!");
+                window.open(file.result.webViewLink, "_blank");
+              } catch (error) {
+                console.error("Error:", error);
+                showNotification(
+                  "Erreur lors de la sauvegarde. Veuillez réessayer.",
+                  "error",
+                );
               }
-            } catch (error) {
-              console.error("Error:", error);
-              const errorMsg = document.createElement("div");
-              errorMsg.className =
-                "fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg";
-              errorMsg.textContent = "Erreur lors de la sauvegarde sur Google Sheets";
-              document.body.appendChild(errorMsg);
-              setTimeout(() => errorMsg.remove(), 3000);
-            }
+            };
+            handleAuth();
           });
-        // Save Invoice Button (placeholder)
+        // Save Invoice Button
         document
           .getElementById("save-invoice-btn")
           .addEventListener("click", function () {
-            alert("Invoice saved successfully!");
+            // Create a notification element
+            const createNotification = (message, type = "success") => {
+              const notification = document.createElement("div");
+              notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center ${type === "success" ? "bg-green-500" : "bg-red-500"} text-white`;
+              const icon = document.createElement("div");
+              icon.className = "w-5 h-5 flex items-center justify-center mr-2";
+              icon.innerHTML =
+                type === "success"
+                  ? '<i class="ri-checkbox-circle-line"></i>'
+                  : '<i class="ri-error-warning-line"></i>';
+              const text = document.createElement("span");
+              text.textContent = message;
+              notification.appendChild(icon);
+              notification.appendChild(text);
+              document.body.appendChild(notification);
+              setTimeout(() => {
+                notification.remove();
+              }, 3000);
+            };
+            try {
+              // Get all invoice data
+              const invoiceData = {
+                invoiceNumber: document.getElementById("invoice-number").value,
+                date: document.getElementById("invoice-date").value,
+                currency: document
+                  .getElementById("currency-selector")
+                  .querySelector("span").textContent,
+                vatRate: document.getElementById("vat-rate").value,
+                client: {
+                  name: document.getElementById("client-name").value,
+                  address: document.getElementById("client-address").value,
+                  contact: document.getElementById("client-contact").value,
+                  taxId: document.getElementById("client-tax-id").value,
+                },
+                items: Array.from(document.querySelectorAll("#invoice-items tr")).map(
+                  (row) => ({
+                    designation: row.querySelector(".item-designation").value,
+                    price: row.querySelector(".item-price").value,
+                    quantity: row.querySelector(".item-quantity").value,
+                    subtotal: row.querySelector(".item-subtotal").textContent,
+                  }),
+                ),
+                totals: {
+                  totalHt: document.getElementById("total-ht").textContent,
+                  totalVat: document.getElementById("total-vat").textContent,
+                  totalTtc: document.getElementById("total-ttc").textContent,
+                },
+              };
+              // Validate required fields
+              if (!invoiceData.client.name) {
+                throw new Error("Le nom du client est requis");
+              }
+              if (invoiceData.items.length === 0) {
+                throw new Error("Ajoutez au moins un article à la facture");
+              }
+              if (
+                invoiceData.items.some((item) => !item.designation || !item.price)
+              ) {
+                throw new Error(
+                  "Tous les articles doivent avoir une désignation et un prix",
+                );
+              }
+              // Save to localStorage for persistence
+              const savedInvoices = JSON.parse(
+                localStorage.getItem("invoices") || "[]",
+              );
+              savedInvoices.push(invoiceData);
+              localStorage.setItem("invoices", JSON.stringify(savedInvoices));
+              // Show success notification
+              createNotification("Facture enregistrée avec succès");
+              // Optional: Reset form for new invoice
+              if (confirm("Voulez-vous créer une nouvelle facture ?")) {
+                document.getElementById("new-invoice-btn").click();
+              }
+            } catch (error) {
+              // Show error notification
+              createNotification(error.message, "error");
+            }
           });
       });
     </script>
