@@ -1,611 +1,825 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Système de Facturation</title>
-<script src="https://cdn.tailwindcss.com/3.4.16">
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        primary: "#4F46E5",
-        secondary: "#6B7280",
-      },
-      borderRadius: {
-        none: "0px",
-        sm: "4px",
-        DEFAULT: "8px",
-        md: "12px",
-        lg: "16px",
-        xl: "20px",
-        "2xl": "24px",
-        "3xl": "32px",
-        full: "9999px",
-        button: "8px",
-      },
-    },
-  },
-};
-</script>
-<style>
-:where([class^="ri-"])::before { content: "\f3c2"; }
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
--webkit-appearance: none;
-margin: 0;
-}
-.login-container {
-background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-</style>
-</head>
-<body class="bg-gray-50">
-<div id="loginPage" class="min-h-screen flex items-center justify-center login-container">
-<div class="bg-white p-8 rounded-lg shadow-lg w-[420px]">
-<div class="text-center mb-8">
-<h1 class="text-3xl font-bold text-gray-800 mb-2">Connexion</h1>
-<p class="text-gray-600">Accédez à votre espace de facturation</p>
-</div>
-<form id="loginForm" class="space-y-6">
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-<i class="ri-user-line text-gray-400"></i>
-</div>
-<input type="text" id="username" class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-button text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Nom d'utilisateur" required>
-</div>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-<i class="ri-lock-line text-gray-400"></i>
-</div>
-<input type="password" id="password" class="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-button text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Mot de passe" required>
-<button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-<i class="ri-eye-line text-gray-400"></i>
-</button>
-</div>
-<div id="errorMessage" class="hidden text-red-500 text-sm text-center"></div>
-<button type="submit" class="w-full bg-primary text-white py-2.5 rounded-button hover:bg-primary/90 transition-colors duration-200 !rounded-button">Se connecter</button>
-<div class="text-center">
-<button type="button" id="demoButton" class="text-primary hover:text-primary/80 text-sm font-medium">Accéder au compte démo</button>
-</div>
-</form>
-</div>
-</div>
-<div id="mainPage" class="hidden min-h-screen flex flex-col">
-<header class="bg-white shadow-sm">
-<div class="mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex justify-between h-16 items-center">
-<div class="flex items-center space-x-4">
-<div id="logoPreview" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
-<i class="ri-image-line text-gray-400"></i>
-</div>
-<div class="text-xl font-bold text-gray-900">Système de Facturation</div>
-</div>
-<div class="flex items-center space-x-4">
-<div id="demoTimer" class="hidden text-sm text-gray-600"></div>
-<button id="profileButton" class="flex items-center text-gray-600 hover:text-gray-900">
-<i class="ri-user-settings-line text-xl mr-1"></i>
-<span>Profil</span>
-</button>
-<button id="newInvoice" class="bg-primary text-white px-4 py-2 !rounded-button hover:bg-primary/90 transition-colors duration-200">
-<i class="ri-add-line mr-2"></i>Nouvelle Facture
-</button>
-<button id="logout" class="text-gray-600 hover:text-gray-900">
-<i class="ri-logout-box-line text-xl"></i>
-</button>
-</div>
-</div>
-</div>
-</header>
-<main class="flex-1 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-<div class="bg-white rounded-lg shadow p-6 mb-6">
-<div class="grid grid-cols-2 gap-6 mb-6">
-<div class="space-y-6">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">N° Facture</label>
-<input type="text" id="invoiceNumber" class="w-full px-3 py-2 border border-gray-300 rounded-button bg-gray-50" readonly>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Date de Facturation</label>
-<input type="date" id="invoiceDate" class="w-full px-3 py-2 border border-gray-300 rounded-button" required>
-</div>
-</div>
-<div class="space-y-6">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Devise</label>
-<select id="currency" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-<option value="DH">DH - Dirham Marocain</option>
-<option value="EUR">EUR - Euro</option>
-<option value="USD">USD - Dollar Américain</option>
-</select>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">TVA (%)</label>
-<input type="number" id="tva" value="20" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-button" required>
-</div>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-6 mb-6">
-<div>
-<h3 class="text-lg font-medium text-gray-900 mb-3">Informations Client</h3>
-<div class="space-y-4">
-<div class="grid grid-cols-2 gap-4">
-<input type="text" id="clientName" placeholder="Nom du client" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-<input type="text" id="clientTaxId" placeholder="N° d'identification fiscale" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-</div>
-<textarea id="clientAddress" placeholder="Adresse complète" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-button"></textarea>
-<div class="grid grid-cols-2 gap-4">
-<input type="email" id="clientEmail" placeholder="Email" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-<input type="tel" id="clientPhone" placeholder="Téléphone" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-</div>
-</div>
-</div>
-<div>
-<h3 class="text-lg font-medium text-gray-900 mb-3">Informations Vendeur</h3>
-<div id="vendorInfoDisplay" class="p-4 bg-gray-50 rounded-lg">
-<p class="text-gray-500 text-sm mb-2">Les informations du vendeur seront automatiquement importées depuis votre profil.</p>
-<div class="space-y-2">
-<p id="displayCompanyName" class="font-medium">-</p>
-<p id="displayCompanyAddress" class="text-gray-600">-</p>
-<div class="flex gap-4 text-sm text-gray-600">
-<p id="displayCompanyPhone">-</p>
-<p id="displayCompanyEmail">-</p>
-</div>
-<p id="displayCompanyTaxId" class="text-sm text-gray-600">-</p>
-</div>
-</div>
-</div>
-</div>
-<div class="mb-6">
-<div class="overflow-x-auto">
-<table class="w-full">
-<thead>
-<tr class="bg-gray-50">
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Désignation</th>
-<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Prix Unitaire</th>
-<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Quantité</th>
-<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Sous-total</th>
-<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-</tr>
-</thead>
-<tbody id="invoiceItems" class="bg-white divide-y divide-gray-200">
-</tbody>
-</table>
-</div>
-<button id="addItem" class="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-button text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-<i class="ri-add-line mr-2"></i>Ajouter une ligne
-</button>
-</div>
-<div class="border-t pt-6">
-<div class="flex justify-end">
-<div class="w-80 space-y-4">
-<div class="flex justify-between items-center py-2">
-<span class="text-gray-600">Total HT:</span>
-<span id="totalHT" class="font-medium text-lg tabular-nums">0.00 DH</span>
-</div>
-<div class="flex justify-between items-center py-2 border-t border-gray-200">
-<span class="text-gray-600">TVA (<span id="tvaRate">20</span>%):</span>
-<span id="totalTVA" class="font-medium text-lg tabular-nums">0.00 DH</span>
-</div>
-<div class="flex justify-between items-center py-3 border-t-2 border-gray-900">
-<span class="text-lg font-bold">Total TTC:</span>
-<span id="totalTTC" class="text-primary text-xl font-bold tabular-nums">0.00 DH</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="flex justify-end space-x-4">
-<button id="saveInvoice" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90">
-<i class="ri-save-line mr-2"></i>Enregistrer
-</button>
-<button id="generatePDF" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-button text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-<i class="ri-file-pdf-line mr-2"></i>Générer PDF
-</button>
-<button id="downloadInvoice" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-button text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-<i class="ri-download-line mr-2"></i>Télécharger
-</button>
-<button id="syncGSheets" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-button text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-<i class="ri-google-line mr-2"></i>Google Sheets
-</button>
-</div>
-</main>
-<div id="profileModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-<div class="relative bg-white rounded-lg shadow-xl mx-auto max-w-md w-full">
-<div class="flex justify-between items-center p-6 border-b">
-<h3 class="text-xl font-semibold text-gray-900">Profil de l'entreprise</h3>
-<button class="close-modal text-gray-400 hover:text-gray-500">
-<i class="ri-close-line text-2xl"></i>
-</button>
-</div>
-<div class="p-6 space-y-4">
-<div class="flex items-center justify-center">
-<div class="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100">
-<img id="companyLogo" class="w-full h-full object-cover hidden">
-<div id="logoPlaceholder" class="w-full h-full flex items-center justify-center">
-<i class="ri-image-line text-gray-400 text-3xl"></i>
-</div>
-<label for="logoUpload" class="absolute inset-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 cursor-pointer transition-opacity">
-<i class="ri-upload-2-line text-white text-xl"></i>
-</label>
-<input type="file" id="logoUpload" class="hidden" accept="image/*">
-</div>
-</div>
-<div class="space-y-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'entreprise</label>
-<input type="text" id="companyName" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">N° d'identification fiscale</label>
-<input type="text" id="companyTaxId" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-<textarea id="companyAddress" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-button"></textarea>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-<input type="tel" id="companyPhone" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-<input type="email" id="companyEmail" class="w-full px-3 py-2 border border-gray-300 rounded-button">
-</div>
-</div>
-</div>
-</div>
-<div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
-<button class="close-modal px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-button hover:bg-gray-50">Annuler</button>
-<button id="saveProfile" class="px-4 py-2 text-sm text-white bg-primary rounded-button hover:bg-primary/90">Enregistrer</button>
-</div>
-</div>
-</div>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-const loginPage = document.getElementById('loginPage');
-const mainPage = document.getElementById('mainPage');
-const loginForm = document.getElementById('loginForm');
-const profileButton = document.getElementById('profileButton');
-const profileModal = document.getElementById('profileModal');
-const closeButtons = document.querySelectorAll('.close-modal');
-const logoUpload = document.getElementById('logoUpload');
-const companyLogo = document.getElementById('companyLogo');
-const logoPlaceholder = document.getElementById('logoPlaceholder');
-const saveProfileButton = document.getElementById('saveProfile');
-const logoPreview = document.getElementById('logoPreview');
-let googleSheetConnection = false;
-let googleAccessToken = null;
-const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
-const API_KEY = 'YOUR_GOOGLE_API_KEY';
-const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-async function initializeGoogleSheetsAPI() {
-try {
-await gapi.client.init({
-apiKey: API_KEY,
-clientId: CLIENT_ID,
-discoveryDocs: [DISCOVERY_DOC],
-scope: SCOPES,
-});
-gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-} catch (error) {
-showToast('Erreur de connexion à Google Sheets', 'error');
-}
-}
-function updateSigninStatus(isSignedIn) {
-googleSheetConnection = isSignedIn;
-const syncButton = document.getElementById('syncGSheets');
-if (isSignedIn) {
-syncButton.innerHTML = '<i class="ri-google-line mr-2"></i>Connecté';
-syncButton.classList.remove('border-gray-300', 'text-gray-700', 'bg-white');
-syncButton.classList.add('border-green-500', 'text-white', 'bg-green-500');
-} else {
-syncButton.innerHTML = '<i class="ri-google-line mr-2"></i>Google Sheets';
-syncButton.classList.remove('border-green-500', 'text-white', 'bg-green-500');
-syncButton.classList.add('border-gray-300', 'text-gray-700', 'bg-white');
-}
-}
-profileButton.addEventListener('click', () => {
-profileModal.classList.remove('hidden');
-});
-closeButtons.forEach(button => {
-button.addEventListener('click', () => {
-profileModal.classList.add('hidden');
-});
-});
-document.getElementById('syncGSheets').addEventListener('click', async () => {
-if (!googleSheetConnection) {
-try {
-await gapi.auth2.getAuthInstance().signIn();
-showToast('Connexion à Google Sheets réussie', 'success');
-} catch (error) {
-showToast('Erreur de connexion à Google Sheets', 'error');
-}
-} else {
-const invoiceData = collectInvoiceData();
-try {
-await appendToGoogleSheet(invoiceData);
-showToast('Données synchronisées avec Google Sheets', 'success');
-} catch (error) {
-showToast('Erreur de synchronisation', 'error');
-}
-}
-});
-function showToast(message, type = 'success') {
-const toast = document.createElement('div');
-toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500 ${
-type === 'success' ? 'bg-green-500' : 'bg-red-500'
-} text-white`;
-toast.textContent = message;
-document.body.appendChild(toast);
-setTimeout(() => {
-toast.style.opacity = '0';
-setTimeout(() => toast.remove(), 500);
-}, 3000);
-}
-function collectInvoiceData() {
-return {
-invoiceNumber: document.getElementById('invoiceNumber').value,
-date: document.getElementById('invoiceDate').value,
-client: {
-name: document.getElementById('clientName').value,
-address: document.getElementById('clientAddress').value,
-email: document.getElementById('clientEmail').value,
-phone: document.getElementById('clientPhone').value,
-taxId: document.getElementById('clientTaxId').value
-},
-items: Array.from(document.getElementById('invoiceItems').querySelectorAll('tr')).map(row => ({
-description: row.querySelector('input[type="text"]').value,
-price: row.querySelector('input[type="number"]:nth-of-type(1)').value,
-quantity: row.querySelector('input[type="number"]:nth-of-type(2)').value,
-total: row.querySelector('.line-total').textContent
-})),
-totals: {
-ht: document.getElementById('totalHT').textContent,
-tva: document.getElementById('totalTVA').textContent,
-ttc: document.getElementById('totalTTC').textContent
-}
-};
-}
-logoUpload.addEventListener('change', function(e) {
-const file = e.target.files[0];
-if (file) {
-if (file.size > 5 * 1024 * 1024) {
-showToast('Le fichier est trop volumineux. Maximum 5MB.', 'error');
-return;
-}
-if (!file.type.match('image.*')) {
-showToast('Le fichier doit être une image.', 'error');
-return;
-}
-const reader = new FileReader();
-reader.onload = function(e) {
-companyLogo.src = e.target.result;
-companyLogo.classList.remove('hidden');
-logoPlaceholder.classList.add('hidden');
-const headerLogo = document.createElement('img');
-headerLogo.src = e.target.result;
-headerLogo.className = 'w-full h-full object-cover';
-logoPreview.innerHTML = '';
-logoPreview.appendChild(headerLogo);
-localStorage.setItem('companyLogo', e.target.result);
-showToast('Logo enregistré avec succès', 'success');
-};
-reader.readAsDataURL(file);
-}
-});
-async function appendToGoogleSheet(data) {
-const spreadsheetId = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms';
-const range = 'Factures!A:Z';
-const values = [
-[
-data.invoiceNumber,
-data.date,
-data.client.name,
-data.client.address,
-data.client.email,
-data.client.phone,
-data.client.taxId,
-data.totals.ht,
-data.totals.tva,
-data.totals.ttc
-]
-];
-try {
-const response = await gapi.client.sheets.spreadsheets.values.append({
-spreadsheetId: spreadsheetId,
-range: range,
-valueInputOption: 'USER_ENTERED',
-resource: { values },
-});
-console.log('Success:', response);
-} catch (error) {
-console.error('Error:', error);
-throw error;
-}
-}
-window.onload = function() {
-const savedLogo = localStorage.getItem('companyLogo');
-if (savedLogo) {
-companyLogo.src = savedLogo;
-companyLogo.classList.remove('hidden');
-logoPlaceholder.classList.add('hidden');
-const headerLogo = document.createElement('img');
-headerLogo.src = savedLogo;
-headerLogo.className = 'w-full h-full object-cover';
-logoPreview.innerHTML = '';
-logoPreview.appendChild(headerLogo);
-}
-};
-saveProfileButton.addEventListener('click', () => {
-const companyData = {
-name: document.getElementById('companyName').value,
-taxId: document.getElementById('companyTaxId').value,
-address: document.getElementById('companyAddress').value,
-phone: document.getElementById('companyPhone').value,
-email: document.getElementById('companyEmail').value
-};
-const toast = document.createElement('div');
-toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
-toast.textContent = 'Profil enregistré avec succès';
-document.body.appendChild(toast);
-setTimeout(() => {
-toast.style.opacity = '0';
-setTimeout(() => toast.remove(), 500);
-}, 2000);
-profileModal.classList.add('hidden');
-});
-const newInvoiceBtn = document.getElementById('newInvoice');
-const saveVendorInfoBtn = document.getElementById('saveVendorInfo');
-function resetInvoice() {
-document.getElementById('invoiceNumber').value = 'FACT-' + Date.now().toString().slice(-6);
-document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
-document.getElementById('currency').value = 'DH';
-document.getElementById('tva').value = '20';
-const inputs = document.querySelectorAll('input:not([readonly]), textarea');
-inputs.forEach(input => {
-if (input.id !== 'invoiceNumber' && input.id !== 'invoiceDate' &&
-input.id !== 'currency' && input.id !== 'tva') {
-input.value = '';
-}
-});
-const tableBody = document.getElementById('invoiceItems');
-tableBody.innerHTML = '';
-addItemButton.click();
-updateTotals();
-}
-newInvoiceBtn.addEventListener('click', function() {
-if (confirm('Voulez-vous créer une nouvelle facture ? Les données non enregistrées seront perdues.')) {
-resetInvoice();
-}
-});
-let vendorInfo = {};
-function updateVendorDisplay() {
-const vendorInfo = JSON.parse(localStorage.getItem('companyProfile')) || {};
-document.getElementById('displayCompanyName').textContent = vendorInfo.name || '-';
-document.getElementById('displayCompanyAddress').textContent = vendorInfo.address || '-';
-document.getElementById('displayCompanyPhone').textContent = vendorInfo.phone || '-';
-document.getElementById('displayCompanyEmail').textContent = vendorInfo.email || '-';
-document.getElementById('displayCompanyTaxId').textContent = vendorInfo.taxId ? `N° Fiscal: ${vendorInfo.taxId}` : '-';
-}
-saveProfileButton.addEventListener('click', () => {
-const companyData = {
-name: document.getElementById('companyName').value,
-taxId: document.getElementById('companyTaxId').value,
-address: document.getElementById('companyAddress').value,
-phone: document.getElementById('companyPhone').value,
-email: document.getElementById('companyEmail').value
-};
-localStorage.setItem('companyProfile', JSON.stringify(companyData));
-updateVendorDisplay();
-const toast = document.createElement('div');
-toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
-toast.textContent = 'Profil enregistré avec succès';
-document.body.appendChild(toast);
-setTimeout(() => {
-toast.style.opacity = '0';
-setTimeout(() => toast.remove(), 500);
-}, 2000);
-profileModal.classList.add('hidden');
-});
-document.getElementById('generatePDF').addEventListener('click', function() {
-generateInvoicePDF();
-});
-function generateInvoicePDF() {
-const vendorInfo = JSON.parse(localStorage.getItem('companyProfile')) || {};
-const invoiceData = {
-invoiceNumber: document.getElementById('invoiceNumber').value,
-date: document.getElementById('invoiceDate').value,
-vendor: vendorInfo,
-client: {
-name: document.getElementById('clientName').value,
-address: document.getElementById('clientAddress').value,
-email: document.getElementById('clientEmail').value,
-phone: document.getElementById('clientPhone').value,
-taxId: document.getElementById('clientTaxId').value
-},
-items: Array.from(document.getElementById('invoiceItems').querySelectorAll('tr')).map(row => ({
-description: row.querySelector('input[type="text"]').value,
-price: row.querySelector('input[type="number"]:nth-of-type(1)').value,
-quantity: row.querySelector('input[type="number"]:nth-of-type(2)').value,
-total: row.querySelector('.line-total').textContent
-})),
-totals: {
-ht: document.getElementById('totalHT').textContent,
-tva: document.getElementById('totalTVA').textContent,
-ttc: document.getElementById('totalTTC').textContent
-}
-};
-const pdfWindow = window.open('', '_blank');
-pdfWindow.document.write(`
-<!DOCTYPE html>
-<html>
-<head>
-<title>Facture ${invoiceData.invoiceNumber}</title>
-<style>
-body { font-family: Arial, sans-serif; margin: 40px; }
-.header { display: flex; justify-content: space-between; margin-bottom: 40px; }
-.invoice-details { margin-bottom: 30px; }
-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-th { background-color: #f8f9fa; }
-.totals { margin-top: 30px; text-align: right; }
-.vendor-info, .client-info { margin-bottom: 20px; }
-</style>
-</head>
-<body>
-<div class="header">
-<div class="vendor-info">
-<h3>Informations Vendeur</h3>
-<p>${vendorInfo.name || ''}</p>
-<p>${vendorInfo.address || ''}</p>
-<p>${vendorInfo.phone || ''} - ${vendorInfo.email || ''}</p>
-<p>N° Fiscal: ${vendorInfo.taxId || ''}</p>
-</div>
-<div class="invoice-details">
-<h2>FACTURE</h2>
-<p>N° ${invoiceData.invoiceNumber}</p>
-<p>Date: ${invoiceData.date}</p>
-</div>
-</div>
-<div class="client-info">
-<h3>Client</h3>
-<p>${invoiceData.client.name}</p>
-<p>${invoiceData.client.address}</p>
-<p>${invoiceData.client.phone} - ${invoiceData.client.email}</p>
-<p>N° Fiscal: ${invoiceData.client.taxId}</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Désignation</th>
-<th>Prix Unitaire</th>
-<th>Quantité</th>
-<th>Sous-total</th>
-</tr>
-</thead>
-<tbody>
-${invoiceData.items.map(item => `
-<tr>
-<td>${item.description}</td>
-<td>${item.price}</td>
-<td>${item.quantity}</td>
-<td>${item.total}</td>
-</tr>
-`).join('')}
-</tbody>
-</table>
-<div class="totals">
-<p>Total HT: ${invoiceData.totals.ht}</p>
-<p>TVA: ${invoiceData.totals.tva}</p>
-<p><strong>Total TTC: ${invoiceData.totals.ttc}</strong></p>
-</div>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice Management System</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#3b82f6", secondary: "#64748b" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      body {
+          font-family: 'Inter', sans-serif;
+          background-color: #f9fafb;
+      }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+      }
+      input[type="number"] {
+          -moz-appearance: textfield;
+      }
+      .custom-checkbox {
+          position: relative;
+          display: inline-block;
+          width: 20px;
+          height: 20px;
+          background-color: white;
+          border: 2px solid #d1d5db;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s;
+      }
+      .custom-checkbox.checked {
+          background-color: #3b82f6;
+          border-color: #3b82f6;
+      }
+      .custom-checkbox.checked::after {
+          content: "";
+          position: absolute;
+          top: 3px;
+          left: 6px;
+          width: 6px;
+          height: 10px;
+          border: solid white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+      }
+      .custom-switch {
+          position: relative;
+          display: inline-block;
+          width: 44px;
+          height: 24px;
+      }
+      .custom-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+      }
+      .switch-slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #e5e7eb;
+          transition: .4s;
+          border-radius: 24px;
+      }
+      .switch-slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: .4s;
+          border-radius: 50%;
+      }
+      input:checked + .switch-slider {
+          background-color: #3b82f6;
+      }
+      input:checked + .switch-slider:before {
+          transform: translateX(20px);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Login Page -->
+    <div
+      id="login-page"
+      class="min-h-screen flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="font-['Pacifico'] text-3xl text-primary">logo</h1>
+          <p class="text-gray-600 mt-2">Invoice Management System</p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label
+              for="username"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Username</label
+            >
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                <div
+                  class="w-5 h-5 flex items-center justify-center text-gray-400"
+                >
+                  <i class="ri-user-line"></i>
+                </div>
+              </div>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                class="pl-10 w-full h-12 border-gray-300 border rounded-button focus:ring-primary focus:border-primary"
+                placeholder="Enter your username"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Password</label
+            >
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                <div
+                  class="w-5 h-5 flex items-center justify-center text-gray-400"
+                >
+                  <i class="ri-lock-line"></i>
+                </div>
+              </div>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="pl-10 w-full h-12 border-gray-300 border rounded-button focus:ring-primary focus:border-primary"
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
+
+          <div id="login-error" class="text-red-500 text-sm hidden">
+            Invalid username or password. Please try again.
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-primary text-white py-3 px-4 rounded-button hover:bg-blue-600 transition-colors duration-200 !rounded-button whitespace-nowrap"
+          >
+            Login
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main Invoice Page (Initially Hidden) -->
+    <div id="invoice-page" class="hidden min-h-screen bg-gray-50">
+      <!-- Header -->
+      <header class="bg-white shadow">
+        <div
+          class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"
+        >
+          <div class="flex items-center">
+            <div
+              id="logo-container"
+              class="w-10 h-10 flex items-center justify-center mr-3"
+            >
+              <span class="font-['Pacifico'] text-xl text-primary">logo</span>
+            </div>
+            <h1 class="text-xl font-semibold text-gray-800">
+              Invoice Management
+            </h1>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button
+              id="new-invoice-btn"
+              class="bg-primary text-white px-4 py-2 rounded-button flex items-center !rounded-button whitespace-nowrap"
+            >
+              <div class="w-5 h-5 flex items-center justify-center mr-2">
+                <i class="ri-add-line"></i>
+              </div>
+              New Invoice
+            </button>
+            <div class="relative">
+              <button
+                id="user-menu-button"
+                class="flex items-center text-gray-700 hover:text-gray-900"
+              >
+                <div
+                  class="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full"
+                >
+                  <i class="ri-user-line"></i>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <!-- Vendor Information Section -->
+          <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-medium text-gray-900">
+                Vendor Information
+              </h2>
+              <button
+                id="toggle-vendor-info"
+                class="text-primary flex items-center"
+              >
+                <span>Edit</span>
+                <div class="w-5 h-5 flex items-center justify-center ml-1">
+                  <i class="ri-edit-line"></i>
+                </div>
+              </button>
+            </div>
+
+            <div
+              id="vendor-info-display"
+              class="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <div>
+                <p class="text-sm text-gray-500">Company Name</p>
+                <p class="font-medium">Acme Corporation</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Address</p>
+                <p class="font-medium">
+                  123 Business Avenue, Suite 200, Casablanca
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Tax ID</p>
+                <p class="font-medium">TAX12345678</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Contact</p>
+                <p class="font-medium">+212 522 123 456 | info@acmecorp.com</p>
+              </div>
+            </div>
+
+            <div
+              id="vendor-info-form"
+              class="hidden grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <div>
+                <label
+                  for="company-name"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Company Name</label
+                >
+                <input
+                  type="text"
+                  id="company-name"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  value="Acme Corporation"
+                />
+              </div>
+              <div>
+                <label
+                  for="company-address"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Address</label
+                >
+                <input
+                  type="text"
+                  id="company-address"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  value="123 Business Avenue, Suite 200, Casablanca"
+                />
+              </div>
+              <div>
+                <label
+                  for="tax-id"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Tax ID</label
+                >
+                <input
+                  type="text"
+                  id="tax-id"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  value="TAX12345678"
+                />
+              </div>
+              <div>
+                <label
+                  for="contact-info"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Contact</label
+                >
+                <input
+                  type="text"
+                  id="contact-info"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  value="+212 522 123 456 | info@acmecorp.com"
+                />
+              </div>
+              <div class="md:col-span-2 flex justify-end">
+                <button
+                  id="save-vendor-info"
+                  class="bg-primary text-white px-4 py-2 rounded-button !rounded-button whitespace-nowrap"
+                >
+                  Save Information
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Details Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+              <label
+                for="invoice-number"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Invoice Number</label
+              >
+              <input
+                type="text"
+                id="invoice-number"
+                class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                value="INV-2025-0001"
+              />
+            </div>
+            <div>
+              <label
+                for="currency"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Currency</label
+              >
+              <div class="relative">
+                <button
+                  id="currency-selector"
+                  class="w-full flex items-center justify-between border border-gray-300 rounded-button p-2 focus:ring-primary focus:border-primary bg-white"
+                >
+                  <span>DH (Moroccan Dirham)</span>
+                  <div class="w-5 h-5 flex items-center justify-center">
+                    <i class="ri-arrow-down-s-line"></i>
+                  </div>
+                </button>
+                <div
+                  id="currency-dropdown"
+                  class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-auto"
+                >
+                  <div class="py-1">
+                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      DH (Moroccan Dirham)
+                    </div>
+                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      USD (US Dollar)
+                    </div>
+                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      EUR (Euro)
+                    </div>
+                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      GBP (British Pound)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label
+                for="invoice-date"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Date</label
+              >
+              <input
+                type="text"
+                id="invoice-date"
+                class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                placeholder="dd/mm/yyyy"
+                value="19/05/2025"
+              />
+            </div>
+            <div>
+              <label
+                for="vat-rate"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >VAT Rate (%)</label
+              >
+              <input
+                type="number"
+                id="vat-rate"
+                class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                value="20"
+              />
+            </div>
+          </div>
+
+          <!-- Client Information Section -->
+          <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">
+              Client Information
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label
+                  for="client-name"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Client Name</label
+                >
+                <input
+                  type="text"
+                  id="client-name"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  placeholder="Enter client name"
+                />
+              </div>
+              <div>
+                <label
+                  for="client-address"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Address</label
+                >
+                <textarea
+                  id="client-address"
+                  rows="2"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  placeholder="Enter client address"
+                ></textarea>
+              </div>
+              <div>
+                <label
+                  for="client-contact"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Contact Details</label
+                >
+                <input
+                  type="text"
+                  id="client-contact"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  placeholder="Phone, email, etc."
+                />
+              </div>
+              <div>
+                <label
+                  for="client-tax-id"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Tax ID/Business Number</label
+                >
+                <input
+                  type="text"
+                  id="client-tax-id"
+                  class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
+                  placeholder="Enter tax ID"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Itemization Table -->
+          <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">
+              Invoice Items
+            </h2>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Designation
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Unit Price
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Quantity
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Subtotal
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="invoice-items"
+                  class="bg-white divide-y divide-gray-200"
+                >
+                  <!-- Item rows will be added here -->
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-4">
+              <button
+                id="add-item-btn"
+                class="text-primary flex items-center !rounded-button whitespace-nowrap"
+              >
+                <div class="w-5 h-5 flex items-center justify-center mr-1">
+                  <i class="ri-add-line"></i>
+                </div>
+                Add Line
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Section -->
+          <div class="flex justify-end">
+            <div class="w-full md:w-1/3">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">Total (HT):</span>
+                  <span id="total-ht" class="font-medium">0.00 DH</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">VAT (20%):</span>
+                  <span id="total-vat" class="font-medium">0.00 DH</span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-gray-200">
+                  <span class="text-gray-800 font-medium">Total (TTC):</span>
+                  <span id="total-ttc" class="text-primary font-bold"
+                    >0.00 DH</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap justify-end gap-4">
+          <button
+            id="save-invoice-btn"
+            class="bg-primary text-white px-6 py-2 rounded-button flex items-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-save-line"></i>
+            </div>
+            Save Invoice
+          </button>
+          <button
+            id="generate-pdf-btn"
+            class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-button flex items-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-file-pdf-line"></i>
+            </div>
+            Generate PDF
+          </button>
+          <button
+            id="download-btn"
+            class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-button flex items-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-download-line"></i>
+            </div>
+            Download
+          </button>
+          <button
+            id="google-sheets-btn"
+            class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-button flex items-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-google-line"></i>
+            </div>
+            Save to Google Sheets
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Login Form Handling
+        const loginForm = document.getElementById("login-form");
+        const loginError = document.getElementById("login-error");
+        const loginPage = document.getElementById("login-page");
+        const invoicePage = document.getElementById("invoice-page");
+
+        loginForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          if (username === "user" && password === "3388") {
+            loginPage.classList.add("hidden");
+            invoicePage.classList.remove("hidden");
+          } else {
+            loginError.classList.remove("hidden");
+          }
+        });
+
+        // Vendor Information Toggle
+        const toggleVendorInfoBtn = document.getElementById("toggle-vendor-info");
+        const vendorInfoDisplay = document.getElementById("vendor-info-display");
+        const vendorInfoForm = document.getElementById("vendor-info-form");
+        const saveVendorInfoBtn = document.getElementById("save-vendor-info");
+
+        toggleVendorInfoBtn.addEventListener("click", function () {
+          vendorInfoDisplay.classList.toggle("hidden");
+          vendorInfoForm.classList.toggle("hidden");
+        });
+
+        saveVendorInfoBtn.addEventListener("click", function () {
+          // Save vendor info logic would go here
+          vendorInfoDisplay.classList.remove("hidden");
+          vendorInfoForm.classList.add("hidden");
+        });
+
+        // Currency Selector
+        const currencySelector = document.getElementById("currency-selector");
+        const currencyDropdown = document.getElementById("currency-dropdown");
+
+        currencySelector.addEventListener("click", function () {
+          currencyDropdown.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", function (e) {
+          if (!currencySelector.contains(e.target)) {
+            currencyDropdown.classList.add("hidden");
+          }
+        });
+
+        currencyDropdown.querySelectorAll("div.px-4").forEach((option) => {
+          option.addEventListener("click", function () {
+            currencySelector.querySelector("span").textContent = this.textContent;
+            currencyDropdown.classList.add("hidden");
+            updateTotals(); // Update currency in totals
+          });
+        });
+
+        // Invoice Items Management
+        const invoiceItems = document.getElementById("invoice-items");
+        const addItemBtn = document.getElementById("add-item-btn");
+        let itemCounter = 0;
+
+        function createItemRow() {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                          <td class="px-6 py-4 whitespace-nowrap">
+                              <input type="text" class="item-designation w-full border-none focus:ring-primary" placeholder="Item description">
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                              <input type="number" class="item-price w-full border-none focus:ring-primary" placeholder="0.00" step="0.01" min="0">
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                              <input type="number" class="item-quantity w-full border-none focus:ring-primary" placeholder="1" min="1" value="1">
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                              <span class="item-subtotal">0.00</span>
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap">
+                              <button class="delete-item text-red-500 hover:text-red-700">
+                                  <div class="w-5 h-5 flex items-center justify-center">
+                                      <i class="ri-delete-bin-line"></i>
+                                  </div>
+                              </button>
+                          </td>
+                      `;
+
+          // Add event listeners for calculations
+          const priceInput = row.querySelector(".item-price");
+          const quantityInput = row.querySelector(".item-quantity");
+          const subtotalSpan = row.querySelector(".item-subtotal");
+          const deleteBtn = row.querySelector(".delete-item");
+
+          function updateSubtotal() {
+            const price = parseFloat(priceInput.value) || 0;
+            const quantity = parseInt(quantityInput.value) || 0;
+            const subtotal = price * quantity;
+            subtotalSpan.textContent = subtotal.toFixed(2);
+            updateTotals();
+          }
+
+          priceInput.addEventListener("input", updateSubtotal);
+          quantityInput.addEventListener("input", updateSubtotal);
+
+          deleteBtn.addEventListener("click", function () {
+            row.remove();
+            updateTotals();
+          });
+
+          return row;
+        }
+
+        addItemBtn.addEventListener("click", function () {
+          invoiceItems.appendChild(createItemRow());
+          itemCounter++;
+        });
+
+        // Add initial row
+        addItemBtn.click();
+
+        // Update Totals
+        function updateTotals() {
+          const vatRateInput = document.getElementById("vat-rate");
+          const totalHtSpan = document.getElementById("total-ht");
+          const totalVatSpan = document.getElementById("total-vat");
+          const totalTtcSpan = document.getElementById("total-ttc");
+          const currencyText = document
+            .getElementById("currency-selector")
+            .querySelector("span")
+            .textContent.split(" ")[0];
+
+          // Calculate total HT
+          let totalHt = 0;
+          document.querySelectorAll(".item-subtotal").forEach((span) => {
+            totalHt += parseFloat(span.textContent) || 0;
+          });
+
+          // Calculate VAT and TTC
+          const vatRate = parseFloat(vatRateInput.value) || 0;
+          const vatAmount = totalHt * (vatRate / 100);
+          const totalTtc = totalHt + vatAmount;
+
+          // Update display
+          totalHtSpan.textContent = `${totalHt.toFixed(2)} ${currencyText}`;
+          totalVatSpan.textContent = `${vatAmount.toFixed(2)} ${currencyText}`;
+          totalTtcSpan.textContent = `${totalTtc.toFixed(2)} ${currencyText}`;
+        }
+
+        // Update totals when VAT rate changes
+        document.getElementById("vat-rate").addEventListener("input", updateTotals);
+
+        // New Invoice Button
+        document
+          .getElementById("new-invoice-btn")
+          .addEventListener("click", function () {
+            // Clear all form fields
+            document.getElementById("invoice-number").value =
+              `INV-2025-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, "0")}`;
+            document.getElementById("invoice-date").value = "19/05/2025";
+            document.getElementById("client-name").value = "";
+            document.getElementById("client-address").value = "";
+            document.getElementById("client-contact").value = "";
+            document.getElementById("client-tax-id").value = "";
+
+            // Clear invoice items
+            invoiceItems.innerHTML = "";
+            itemCounter = 0;
+
+            // Add a fresh row
+            addItemBtn.click();
+
+            // Reset totals
+            updateTotals();
+          });
+
+        // Generate PDF Button (placeholder)
+        document
+          .getElementById("generate-pdf-btn")
+          .addEventListener("click", function () {
+            alert("PDF generation functionality would be implemented here.");
+          });
+
+        // Download Button (placeholder)
+        document
+          .getElementById("download-btn")
+          .addEventListener("click", function () {
+            alert("Download functionality would be implemented here.");
+          });
+
+        // Google Sheets Button (placeholder)
+        document
+          .getElementById("google-sheets-btn")
+          .addEventListener("click", function () {
+            alert("Google Sheets integration would be implemented here.");
+          });
+
+        // Save Invoice Button (placeholder)
+        document
+          .getElementById("save-invoice-btn")
+          .addEventListener("click", function () {
+            alert("Invoice saved successfully!");
+          });
+      });
+    </script>
+  </body>
 </html>
