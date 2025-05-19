@@ -2,8 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Invoice Management System</title>
+    <title>Système de Gestion des Factures</title>
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
       tailwind.config = {
@@ -39,81 +42,81 @@
     <style>
       :where([class^="ri-"])::before { content: "\f3c2"; }
       body {
-          font-family: 'Inter', sans-serif;
-          background-color: #f9fafb;
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
       }
       input[type="number"]::-webkit-inner-spin-button,
       input[type="number"]::-webkit-outer-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
+      -webkit-appearance: none;
+      margin: 0;
       }
       input[type="number"] {
-          -moz-appearance: textfield;
+      -moz-appearance: textfield;
       }
       .custom-checkbox {
-          position: relative;
-          display: inline-block;
-          width: 20px;
-          height: 20px;
-          background-color: white;
-          border: 2px solid #d1d5db;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: all 0.2s;
+      position: relative;
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-color: white;
+      border: 2px solid #d1d5db;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
       }
       .custom-checkbox.checked {
-          background-color: #3b82f6;
-          border-color: #3b82f6;
+      background-color: #3b82f6;
+      border-color: #3b82f6;
       }
       .custom-checkbox.checked::after {
-          content: "";
-          position: absolute;
-          top: 3px;
-          left: 6px;
-          width: 6px;
-          height: 10px;
-          border: solid white;
-          border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 6px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
       }
       .custom-switch {
-          position: relative;
-          display: inline-block;
-          width: 44px;
-          height: 24px;
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
       }
       .custom-switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
+      opacity: 0;
+      width: 0;
+      height: 0;
       }
       .switch-slider {
-          position: absolute;
-          cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: #e5e7eb;
-          transition: .4s;
-          border-radius: 24px;
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e7eb;
+      transition: .4s;
+      border-radius: 24px;
       }
       .switch-slider:before {
-          position: absolute;
-          content: "";
-          height: 18px;
-          width: 18px;
-          left: 3px;
-          bottom: 3px;
-          background-color: white;
-          transition: .4s;
-          border-radius: 50%;
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
       }
       input:checked + .switch-slider {
-          background-color: #3b82f6;
+      background-color: #3b82f6;
       }
       input:checked + .switch-slider:before {
-          transform: translateX(20px);
+      transform: translateX(20px);
       }
     </style>
   </head>
@@ -126,15 +129,14 @@
       <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
         <div class="text-center mb-8">
           <h1 class="font-['Pacifico'] text-3xl text-primary">logo</h1>
-          <p class="text-gray-600 mt-2">Invoice Management System</p>
+          <p class="text-gray-600 mt-2">Système de Gestion des Factures</p>
         </div>
-
         <form id="login-form" class="space-y-6">
           <div>
             <label
               for="username"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Username</label
+              >Nom d'utilisateur</label
             >
             <div class="relative">
               <div class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -149,16 +151,15 @@
                 id="username"
                 name="username"
                 class="pl-10 w-full h-12 border-gray-300 border rounded-button focus:ring-primary focus:border-primary"
-                placeholder="Enter your username"
+                placeholder="Entrez votre nom d'utilisateur"
               />
             </div>
           </div>
-
           <div>
             <label
               for="password"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Password</label
+              >Mot de passe</label
             >
             <div class="relative">
               <div class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -173,25 +174,22 @@
                 id="password"
                 name="password"
                 class="pl-10 w-full h-12 border-gray-300 border rounded-button focus:ring-primary focus:border-primary"
-                placeholder="Enter your password"
+                placeholder="Entrez votre mot de passe"
               />
             </div>
           </div>
-
           <div id="login-error" class="text-red-500 text-sm hidden">
-            Invalid username or password. Please try again.
+            Nom d'utilisateur ou mot de passe invalide. Veuillez réessayer.
           </div>
-
           <button
             type="submit"
             class="w-full bg-primary text-white py-3 px-4 rounded-button hover:bg-blue-600 transition-colors duration-200 !rounded-button whitespace-nowrap"
           >
-            Login
+            Se connecter
           </button>
         </form>
       </div>
     </div>
-
     <!-- Main Invoice Page (Initially Hidden) -->
     <div id="invoice-page" class="hidden min-h-screen bg-gray-50">
       <!-- Header -->
@@ -207,7 +205,7 @@
               <span class="font-['Pacifico'] text-xl text-primary">logo</span>
             </div>
             <h1 class="text-xl font-semibold text-gray-800">
-              Invoice Management
+              Gestion des Factures
             </h1>
           </div>
           <div class="flex items-center space-x-4">
@@ -218,7 +216,7 @@
               <div class="w-5 h-5 flex items-center justify-center mr-2">
                 <i class="ri-add-line"></i>
               </div>
-              New Invoice
+              Nouvelle Facture
             </button>
             <div class="relative">
               <button
@@ -235,7 +233,6 @@
           </div>
         </div>
       </header>
-
       <!-- Main Content -->
       <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
@@ -243,35 +240,34 @@
           <div class="mb-8">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-gray-900">
-                Vendor Information
+                Informations du Vendeur
               </h2>
               <button
                 id="toggle-vendor-info"
                 class="text-primary flex items-center"
               >
-                <span>Edit</span>
+                <span>Modifier</span>
                 <div class="w-5 h-5 flex items-center justify-center ml-1">
                   <i class="ri-edit-line"></i>
                 </div>
               </button>
             </div>
-
             <div
               id="vendor-info-display"
               class="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
               <div>
-                <p class="text-sm text-gray-500">Company Name</p>
+                <p class="text-sm text-gray-500">Nom de l'entreprise</p>
                 <p class="font-medium">Acme Corporation</p>
               </div>
               <div>
-                <p class="text-sm text-gray-500">Address</p>
+                <p class="text-sm text-gray-500">Adresse</p>
                 <p class="font-medium">
                   123 Business Avenue, Suite 200, Casablanca
                 </p>
               </div>
               <div>
-                <p class="text-sm text-gray-500">Tax ID</p>
+                <p class="text-sm text-gray-500">Numéro de TVA</p>
                 <p class="font-medium">TAX12345678</p>
               </div>
               <div>
@@ -279,7 +275,6 @@
                 <p class="font-medium">+212 522 123 456 | info@acmecorp.com</p>
               </div>
             </div>
-
             <div
               id="vendor-info-form"
               class="hidden grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -288,7 +283,7 @@
                 <label
                   for="company-name"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Company Name</label
+                  >Nom de l'entreprise</label
                 >
                 <input
                   type="text"
@@ -301,7 +296,7 @@
                 <label
                   for="company-address"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Address</label
+                  >Adresse</label
                 >
                 <input
                   type="text"
@@ -314,7 +309,7 @@
                 <label
                   for="tax-id"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Tax ID</label
+                  >Numéro de TVA</label
                 >
                 <input
                   type="text"
@@ -341,19 +336,18 @@
                   id="save-vendor-info"
                   class="bg-primary text-white px-4 py-2 rounded-button !rounded-button whitespace-nowrap"
                 >
-                  Save Information
+                  Enregistrer les informations
                 </button>
               </div>
             </div>
           </div>
-
           <!-- Invoice Details Section -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
               <label
                 for="invoice-number"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Invoice Number</label
+                >Numéro de facture</label
               >
               <input
                 type="text"
@@ -366,7 +360,7 @@
               <label
                 for="currency"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Currency</label
+                >Devise</label
               >
               <div class="relative">
                 <button
@@ -417,7 +411,7 @@
               <label
                 for="vat-rate"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >VAT Rate (%)</label
+                >Taux de TVA (%)</label
               >
               <input
                 type="number"
@@ -427,72 +421,70 @@
               />
             </div>
           </div>
-
           <!-- Client Information Section -->
           <div class="mb-8">
             <h2 class="text-lg font-medium text-gray-900 mb-4">
-              Client Information
+              Informations du Client
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="md:col-span-2">
                 <label
                   for="client-name"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Client Name</label
+                  >Nom du client</label
                 >
                 <input
                   type="text"
                   id="client-name"
                   class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
-                  placeholder="Enter client name"
+                  placeholder="Entrez le nom du client"
                 />
               </div>
               <div>
                 <label
                   for="client-address"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Address</label
+                  >Adresse</label
                 >
                 <textarea
                   id="client-address"
                   rows="2"
                   class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
-                  placeholder="Enter client address"
+                  placeholder="Entrez l'adresse du client"
                 ></textarea>
               </div>
               <div>
                 <label
                   for="client-contact"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Contact Details</label
+                  >Coordonnées</label
                 >
                 <input
                   type="text"
                   id="client-contact"
                   class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
-                  placeholder="Phone, email, etc."
+                  placeholder="Téléphone, email, etc."
                 />
               </div>
               <div>
                 <label
                   for="client-tax-id"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Tax ID/Business Number</label
+                  >Numéro de TVA/SIRET</label
                 >
                 <input
                   type="text"
                   id="client-tax-id"
                   class="w-full border-gray-300 border rounded-button p-2 focus:ring-primary focus:border-primary"
-                  placeholder="Enter tax ID"
+                  placeholder="Entrez le numéro de TVA"
                 />
               </div>
             </div>
           </div>
-
           <!-- Itemization Table -->
           <div class="mb-8">
             <h2 class="text-lg font-medium text-gray-900 mb-4">
-              Invoice Items
+              Articles de la facture
             </h2>
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
@@ -502,25 +494,25 @@
                       scope="col"
                       class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Designation
+                      Désignation
                     </th>
                     <th
                       scope="col"
                       class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Unit Price
+                      Prix unitaire
                     </th>
                     <th
                       scope="col"
                       class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Quantity
+                      Quantité
                     </th>
                     <th
                       scope="col"
                       class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Subtotal
+                      Sous-total
                     </th>
                     <th
                       scope="col"
@@ -546,25 +538,24 @@
                 <div class="w-5 h-5 flex items-center justify-center mr-1">
                   <i class="ri-add-line"></i>
                 </div>
-                Add Line
+                Ajouter une ligne
               </button>
             </div>
           </div>
-
           <!-- Summary Section -->
           <div class="flex justify-end">
             <div class="w-full md:w-1/3">
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">Total (HT):</span>
+                  <span class="text-gray-600">Total HT :</span>
                   <span id="total-ht" class="font-medium">0.00 DH</span>
                 </div>
                 <div class="flex justify-between mb-2">
-                  <span class="text-gray-600">VAT (20%):</span>
+                  <span class="text-gray-600">TVA (20%) :</span>
                   <span id="total-vat" class="font-medium">0.00 DH</span>
                 </div>
                 <div class="flex justify-between pt-2 border-t border-gray-200">
-                  <span class="text-gray-800 font-medium">Total (TTC):</span>
+                  <span class="text-gray-800 font-medium">Total TTC :</span>
                   <span id="total-ttc" class="text-primary font-bold"
                     >0.00 DH</span
                   >
@@ -582,7 +573,7 @@
             <div class="w-5 h-5 flex items-center justify-center mr-2">
               <i class="ri-save-line"></i>
             </div>
-            Save Invoice
+            Enregistrer la facture
           </button>
           <button
             id="generate-pdf-btn"
@@ -591,7 +582,7 @@
             <div class="w-5 h-5 flex items-center justify-center mr-2">
               <i class="ri-file-pdf-line"></i>
             </div>
-            Generate PDF
+            Générer PDF
           </button>
           <button
             id="download-btn"
@@ -600,7 +591,7 @@
             <div class="w-5 h-5 flex items-center justify-center mr-2">
               <i class="ri-download-line"></i>
             </div>
-            Download
+            Télécharger
           </button>
           <button
             id="google-sheets-btn"
@@ -609,12 +600,11 @@
             <div class="w-5 h-5 flex items-center justify-center mr-2">
               <i class="ri-google-line"></i>
             </div>
-            Save to Google Sheets
+            Sauvegarder sur Google Sheets
           </button>
         </div>
       </main>
     </div>
-
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Login Form Handling
@@ -622,12 +612,10 @@
         const loginError = document.getElementById("login-error");
         const loginPage = document.getElementById("login-page");
         const invoicePage = document.getElementById("invoice-page");
-
         loginForm.addEventListener("submit", function (e) {
           e.preventDefault();
           const username = document.getElementById("username").value;
           const password = document.getElementById("password").value;
-
           if (username === "user" && password === "3388") {
             loginPage.classList.add("hidden");
             invoicePage.classList.remove("hidden");
@@ -635,38 +623,31 @@
             loginError.classList.remove("hidden");
           }
         });
-
         // Vendor Information Toggle
         const toggleVendorInfoBtn = document.getElementById("toggle-vendor-info");
         const vendorInfoDisplay = document.getElementById("vendor-info-display");
         const vendorInfoForm = document.getElementById("vendor-info-form");
         const saveVendorInfoBtn = document.getElementById("save-vendor-info");
-
         toggleVendorInfoBtn.addEventListener("click", function () {
           vendorInfoDisplay.classList.toggle("hidden");
           vendorInfoForm.classList.toggle("hidden");
         });
-
         saveVendorInfoBtn.addEventListener("click", function () {
           // Save vendor info logic would go here
           vendorInfoDisplay.classList.remove("hidden");
           vendorInfoForm.classList.add("hidden");
         });
-
         // Currency Selector
         const currencySelector = document.getElementById("currency-selector");
         const currencyDropdown = document.getElementById("currency-dropdown");
-
         currencySelector.addEventListener("click", function () {
           currencyDropdown.classList.toggle("hidden");
         });
-
         document.addEventListener("click", function (e) {
           if (!currencySelector.contains(e.target)) {
             currencyDropdown.classList.add("hidden");
           }
         });
-
         currencyDropdown.querySelectorAll("div.px-4").forEach((option) => {
           option.addEventListener("click", function () {
             currencySelector.querySelector("span").textContent = this.textContent;
@@ -674,42 +655,38 @@
             updateTotals(); // Update currency in totals
           });
         });
-
         // Invoice Items Management
         const invoiceItems = document.getElementById("invoice-items");
         const addItemBtn = document.getElementById("add-item-btn");
         let itemCounter = 0;
-
         function createItemRow() {
           const row = document.createElement("tr");
           row.innerHTML = `
-                          <td class="px-6 py-4 whitespace-nowrap">
-                              <input type="text" class="item-designation w-full border-none focus:ring-primary" placeholder="Item description">
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap">
-                              <input type="number" class="item-price w-full border-none focus:ring-primary" placeholder="0.00" step="0.01" min="0">
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap">
-                              <input type="number" class="item-quantity w-full border-none focus:ring-primary" placeholder="1" min="1" value="1">
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap">
-                              <span class="item-subtotal">0.00</span>
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap">
-                              <button class="delete-item text-red-500 hover:text-red-700">
-                                  <div class="w-5 h-5 flex items-center justify-center">
-                                      <i class="ri-delete-bin-line"></i>
-                                  </div>
-                              </button>
-                          </td>
-                      `;
-
+      <td class="px-6 py-4 whitespace-nowrap">
+      <input type="text" class="item-designation w-full border-none focus:ring-primary" placeholder="Item description">
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+      <input type="number" class="item-price w-full border-none focus:ring-primary" placeholder="0.00" step="0.01" min="0">
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+      <input type="number" class="item-quantity w-full border-none focus:ring-primary" placeholder="1" min="1" value="1">
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+      <span class="item-subtotal">0.00</span>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+      <button class="delete-item text-red-500 hover:text-red-700">
+      <div class="w-5 h-5 flex items-center justify-center">
+      <i class="ri-delete-bin-line"></i>
+      </div>
+      </button>
+      </td>
+      `;
           // Add event listeners for calculations
           const priceInput = row.querySelector(".item-price");
           const quantityInput = row.querySelector(".item-quantity");
           const subtotalSpan = row.querySelector(".item-subtotal");
           const deleteBtn = row.querySelector(".delete-item");
-
           function updateSubtotal() {
             const price = parseFloat(priceInput.value) || 0;
             const quantity = parseInt(quantityInput.value) || 0;
@@ -717,26 +694,20 @@
             subtotalSpan.textContent = subtotal.toFixed(2);
             updateTotals();
           }
-
           priceInput.addEventListener("input", updateSubtotal);
           quantityInput.addEventListener("input", updateSubtotal);
-
           deleteBtn.addEventListener("click", function () {
             row.remove();
             updateTotals();
           });
-
           return row;
         }
-
         addItemBtn.addEventListener("click", function () {
           invoiceItems.appendChild(createItemRow());
           itemCounter++;
         });
-
         // Add initial row
         addItemBtn.click();
-
         // Update Totals
         function updateTotals() {
           const vatRateInput = document.getElementById("vat-rate");
@@ -747,27 +718,22 @@
             .getElementById("currency-selector")
             .querySelector("span")
             .textContent.split(" ")[0];
-
           // Calculate total HT
           let totalHt = 0;
           document.querySelectorAll(".item-subtotal").forEach((span) => {
             totalHt += parseFloat(span.textContent) || 0;
           });
-
           // Calculate VAT and TTC
           const vatRate = parseFloat(vatRateInput.value) || 0;
           const vatAmount = totalHt * (vatRate / 100);
           const totalTtc = totalHt + vatAmount;
-
           // Update display
           totalHtSpan.textContent = `${totalHt.toFixed(2)} ${currencyText}`;
           totalVatSpan.textContent = `${vatAmount.toFixed(2)} ${currencyText}`;
           totalTtcSpan.textContent = `${totalTtc.toFixed(2)} ${currencyText}`;
         }
-
         // Update totals when VAT rate changes
         document.getElementById("vat-rate").addEventListener("input", updateTotals);
-
         // New Invoice Button
         document
           .getElementById("new-invoice-btn")
@@ -780,39 +746,150 @@
             document.getElementById("client-address").value = "";
             document.getElementById("client-contact").value = "";
             document.getElementById("client-tax-id").value = "";
-
             // Clear invoice items
             invoiceItems.innerHTML = "";
             itemCounter = 0;
-
             // Add a fresh row
             addItemBtn.click();
-
             // Reset totals
             updateTotals();
           });
-
-        // Generate PDF Button (placeholder)
+        // Generate PDF Button
         document
           .getElementById("generate-pdf-btn")
           .addEventListener("click", function () {
-            alert("PDF generation functionality would be implemented here.");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            // Add company logo and header
+            doc.setFontSize(22);
+            doc.text("FACTURE", 105, 20, { align: "center" });
+            // Add invoice details
+            doc.setFontSize(10);
+            doc.text(
+              `Numéro de facture: ${document.getElementById("invoice-number").value}`,
+              20,
+              40,
+            );
+            doc.text(
+              `Date: ${document.getElementById("invoice-date").value}`,
+              20,
+              45,
+            );
+            // Add vendor information
+            doc.text("Informations du vendeur:", 20, 60);
+            doc.text(document.getElementById("company-name").value, 20, 65);
+            doc.text(document.getElementById("company-address").value, 20, 70);
+            // Add client information
+            doc.text("Informations du client:", 20, 85);
+            doc.text(document.getElementById("client-name").value, 20, 90);
+            doc.text(document.getElementById("client-address").value, 20, 95);
+            // Add items table
+            const items = [];
+            document.querySelectorAll("#invoice-items tr").forEach((row) => {
+              const designation = row.querySelector(".item-designation").value;
+              const price = row.querySelector(".item-price").value;
+              const quantity = row.querySelector(".item-quantity").value;
+              const subtotal = row.querySelector(".item-subtotal").textContent;
+              items.push([designation, price, quantity, subtotal]);
+            });
+            doc.autoTable({
+              startY: 110,
+              head: [["Désignation", "Prix unitaire", "Quantité", "Sous-total"]],
+              body: items,
+            });
+            // Add totals
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.text(
+              `Total HT: ${document.getElementById("total-ht").textContent}`,
+              150,
+              finalY,
+            );
+            doc.text(
+              `TVA: ${document.getElementById("total-vat").textContent}`,
+              150,
+              finalY + 5,
+            );
+            doc.text(
+              `Total TTC: ${document.getElementById("total-ttc").textContent}`,
+              150,
+              finalY + 10,
+            );
+            // Save PDF
+            doc.save("facture.pdf");
           });
-
         // Download Button (placeholder)
         document
           .getElementById("download-btn")
           .addEventListener("click", function () {
             alert("Download functionality would be implemented here.");
           });
-
-        // Google Sheets Button (placeholder)
+        // Google Sheets Integration
         document
           .getElementById("google-sheets-btn")
-          .addEventListener("click", function () {
-            alert("Google Sheets integration would be implemented here.");
-          });
+          .addEventListener("click", async function () {
+            const CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
+            const API_KEY = "YOUR_GOOGLE_API_KEY";
+            const DISCOVERY_DOCS = [
+              "https://sheets.googleapis.com/$discovery/rest?version=v4",
+            ];
+            const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+            try {
+              await gapi.client.init({
+                apiKey: API_KEY,
+                clientId: CLIENT_ID,
+                discoveryDocs: DISCOVERY_DOCS,
+                scope: SCOPES,
+              });
+              const auth = await gapi.auth2.getAuthInstance().signIn();
 
+              if (auth) {
+                // Create a new spreadsheet
+                const response = await gapi.client.sheets.spreadsheets.create({
+                  properties: {
+                    title: `Facture ${document.getElementById("invoice-number").value}`,
+                  },
+                });
+                const spreadsheetId = response.result.spreadsheetId;
+                // Prepare invoice data
+                const invoiceData = [
+                  [
+                    "Numéro de facture",
+                    document.getElementById("invoice-number").value,
+                  ],
+                  ["Date", document.getElementById("invoice-date").value],
+                  ["Client", document.getElementById("client-name").value],
+                  ["Total HT", document.getElementById("total-ht").textContent],
+                  ["TVA", document.getElementById("total-vat").textContent],
+                  ["Total TTC", document.getElementById("total-ttc").textContent],
+                ];
+                // Update the spreadsheet
+                await gapi.client.sheets.spreadsheets.values.update({
+                  spreadsheetId: spreadsheetId,
+                  range: "A1:B6",
+                  valueInputOption: "USER_ENTERED",
+                  resource: {
+                    values: invoiceData,
+                  },
+                });
+                // Show success message
+                const successMsg = document.createElement("div");
+                successMsg.className =
+                  "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg";
+                successMsg.textContent =
+                  "Facture sauvegardée sur Google Sheets avec succès!";
+                document.body.appendChild(successMsg);
+                setTimeout(() => successMsg.remove(), 3000);
+              }
+            } catch (error) {
+              console.error("Error:", error);
+              const errorMsg = document.createElement("div");
+              errorMsg.className =
+                "fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg";
+              errorMsg.textContent = "Erreur lors de la sauvegarde sur Google Sheets";
+              document.body.appendChild(errorMsg);
+              setTimeout(() => errorMsg.remove(), 3000);
+            }
+          });
         // Save Invoice Button (placeholder)
         document
           .getElementById("save-invoice-btn")
