@@ -1,531 +1,729 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Système de Facturation</title>
-<script src="https://cdn.tailwindcss.com/3.4.16"></script>
-<script>tailwind.config={theme:{extend:{colors:{primary:'#4f46e5',secondary:'#6366f1'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
-<style>
-:where([class^="ri-"])::before { content: "\f3c2"; }
-body {
-font-family: 'Inter', sans-serif;
-background-color: #f9fafb;
-}
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
--webkit-appearance: none;
-margin: 0;
-}
-input[type="number"] {
--moz-appearance: textfield;
-}
-.custom-checkbox {
-position: relative;
-display: inline-block;
-width: 20px;
-height: 20px;
-margin-right: 8px;
-}
-.custom-checkbox input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-.checkmark {
-position: absolute;
-top: 0;
-left: 0;
-width: 20px;
-height: 20px;
-background-color: #fff;
-border: 2px solid #d1d5db;
-border-radius: 4px;
-}
-.custom-checkbox input:checked ~ .checkmark {
-background-color: #4f46e5;
-border-color: #4f46e5;
-}
-.checkmark:after {
-content: "";
-position: absolute;
-display: none;
-}
-.custom-checkbox input:checked ~ .checkmark:after {
-display: block;
-}
-.custom-checkbox .checkmark:after {
-left: 6px;
-top: 2px;
-width: 6px;
-height: 10px;
-border: solid white;
-border-width: 0 2px 2px 0;
-transform: rotate(45deg);
-}
-.switch {
-position: relative;
-display: inline-block;
-width: 48px;
-height: 24px;
-}
-.switch input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-.slider {
-position: absolute;
-cursor: pointer;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background-color: #e5e7eb;
-transition: .4s;
-border-radius: 24px;
-}
-.slider:before {
-position: absolute;
-content: "";
-height: 18px;
-width: 18px;
-left: 3px;
-bottom: 3px;
-background-color: white;
-transition: .4s;
-border-radius: 50%;
-}
-input:checked + .slider {
-background-color: #4f46e5;
-}
-input:checked + .slider:before {
-transform: translateX(24px);
-}
-</style>
-</head>
-<body>
-<div class="min-h-screen flex flex-col">
-<!-- Header -->
-<header class="bg-white shadow-sm">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-<div class="flex items-center">
-<h1 class="text-2xl font-semibold text-gray-900">Système de Facturation</h1>
-</div>
-<div class="flex items-center space-x-4">
-<button class="bg-white text-primary border border-primary px-4 py-2 !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors">
-<span class="flex items-center">
-<span class="w-5 h-5 flex items-center justify-center mr-2">
-<i class="ri-file-add-line"></i>
-</span>
-Nouvelle facture
-</span>
-</button>
-<button id="headerGoogleLogin" class="bg-primary text-white px-4 py-2 !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors">
-<span class="flex items-center">
-<span class="w-5 h-5 flex items-center justify-center mr-2">
-<i class="ri-google-fill"></i>
-</span>
-<span id="headerLoginText">Se connecter avec Google</span>
-</span>
-</button>
-</div>
-</div>
-</header>
-<!-- Main Content -->
-<main class="flex-grow">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-<div class="bg-white shadow rounded-lg overflow-hidden">
-<!-- Invoice Header -->
-<div class="p-6 border-b border-gray-200">
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-<div class="flex-1">
-<div class="flex items-center mb-4">
-<button class="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors">
-<span class="w-6 h-6 flex items-center justify-center">
-<i class="ri-image-add-line text-lg"></i>
-</span>
-</button>
-<span class="ml-3 text-gray-500 text-sm">Ajouter un logo</span>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Type de facture</label>
-<div class="relative">
-<button class="w-full bg-white border border-gray-300 rounded text-left px-4 py-2 pr-8 !rounded-button flex justify-between items-center">
-<span>Facture</span>
-<span class="w-5 h-5 flex items-center justify-center">
-<i class="ri-arrow-down-s-line"></i>
-</span>
-</button>
-</div>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Numéro de facture</label>
-<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="Numéro de facture">
-</div>
-</div>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" value="20/05/2025">
-</div>
-</div>
-</div>
-<!-- Client Information -->
-<div class="p-6 border-b border-gray-200">
-<h2 class="text-lg font-medium text-gray-900 mb-4">Client</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Nom du client</label>
-<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="Nom du client">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">ICE du client</label>
-<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="ICE du client">
-</div>
-<div class="md:col-span-2">
-<label class="block text-sm font-medium text-gray-700 mb-1">Adresse du client</label>
-<textarea class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" rows="2" placeholder="Adresse du client"></textarea>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">TVA (%)</label>
-<input type="number" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" value="20">
-</div>
-</div>
-</div>
-<!-- Invoice Lines -->
-<div class="p-6 border-b border-gray-200">
-<h2 class="text-lg font-medium text-gray-900 mb-4">Lignes de facture</h2>
-<div class="overflow-x-auto">
-<table class="min-w-full divide-y divide-gray-200">
-<thead>
-<tr>
-<th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Désignation</th>
-<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Prix unitaire</th>
-<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
-<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-</tr>
-</thead>
-<tbody class="bg-white divide-y divide-gray-200">
-<tr>
-<td class="px-4 py-3 whitespace-nowrap">
-<input type="text" class="w-full border-none focus:ring-0 text-sm" placeholder="Description du produit ou service">
-</td>
-<td class="px-4 py-3 whitespace-nowrap">
-<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" placeholder="0.00">
-</td>
-<td class="px-4 py-3 whitespace-nowrap">
-<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" value="1">
-</td>
-<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">0.00 DH</td>
-<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-<button class="text-red-500 hover:text-red-700">
-<span class="w-5 h-5 flex items-center justify-center">
-<i class="ri-delete-bin-line"></i>
-</span>
-</button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="mt-4">
-<button class="flex items-center text-primary hover:text-primary/80 text-sm font-medium">
-<span class="w-5 h-5 flex items-center justify-center mr-1">
-<i class="ri-add-line"></i>
-</span>
-Ajouter une ligne
-</button>
-</div>
-</div>
-<!-- Vendor Information -->
-<div class="p-6 border-b border-gray-200">
-<h2 class="text-lg font-medium text-gray-900 mb-4">Informations du vendeur</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Nom ou entreprise</label>
-<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="Nom de l'entreprise">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-<input type="email" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="contact@entreprise.com">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-<input type="tel" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="+212 XXXXXXXXX">
-</div>
-<div class="md:col-span-2">
-<label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-<textarea class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" rows="2" placeholder="Adresse complète"></textarea>
-</div>
-<div class="md:col-span-2">
-<label class="block text-sm font-medium text-gray-700 mb-1">Informations supplémentaires</label>
-<textarea class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" rows="2" placeholder="ICE, RC, Patente, etc."></textarea>
-</div>
-</div>
-</div>
-<!-- Invoice Summary -->
-<div class="p-6 bg-gray-50">
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-<div class="mb-6 md:mb-0">
-<h2 class="text-lg font-medium text-gray-900 mb-4">Résumé de la facture</h2>
-<div class="space-y-2">
-<div class="flex justify-between">
-<span class="text-sm text-gray-600">Total HT:</span>
-<span class="text-sm font-medium">0.00 DH</span>
-</div>
-<div class="flex justify-between">
-<span class="text-sm text-gray-600">TVA (20%):</span>
-<span class="text-sm font-medium">0.00 DH</span>
-</div>
-<div class="flex justify-between pt-2 border-t border-gray-200">
-<span class="text-base font-medium text-gray-900">Total TTC:</span>
-<span class="text-base font-bold text-gray-900">0.00 DH</span>
-</div>
-</div>
-</div>
-<div class="flex flex-col space-y-3">
-<button class="bg-primary text-white px-6 py-2 !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors">
-<span class="flex items-center">
-<span class="w-5 h-5 flex items-center justify-center mr-2">
-<i class="ri-file-pdf-line"></i>
-</span>
-Générer PDF
-</span>
-</button>
-<button class="bg-white text-primary border border-primary px-6 py-2 !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors">
-<span class="flex items-center">
-<span class="w-5 h-5 flex items-center justify-center mr-2">
-<i class="ri-download-line"></i>
-</span>
-Télécharger PDF
-</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-<!-- Google Integration -->
-<div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
-<div class="p-6">
-<div class="flex flex-col md:flex-row items-start md:items-center justify-between">
-<div>
-<h2 class="text-lg font-medium text-gray-900 mb-2">Intégration Google</h2>
-<p class="text-sm text-gray-600 mb-4">Connectez votre compte Google pour activer des fonctionnalités supplémentaires.</p>
-<div class="bg-blue-50 rounded-lg p-4 mb-4 md:mb-0">
-<h3 class="text-sm font-medium text-blue-800 mb-2">L'intégration avec Google vous permet de:</h3>
-<ul class="text-sm text-blue-700 space-y-1">
-<li class="flex items-start">
-<span class="w-5 h-5 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
-<i class="ri-check-line text-blue-600"></i>
-</span>
-<span>Stocker automatiquement vos factures dans Google Drive</span>
-</li>
-<li class="flex items-start">
-<span class="w-5 h-5 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
-<i class="ri-check-line text-blue-600"></i>
-</span>
-<span>Suivre toutes vos factures dans un fichier Google Sheets dédié</span>
-</li>
-<li class="flex items-start">
-<span class="w-5 h-5 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
-<i class="ri-check-line text-blue-600"></i>
-</span>
-<span>Accéder facilement à l'historique complet de vos factures</span>
-</li>
-</ul>
-</div>
-</div>
-<div class="mt-6 md:mt-0">
-<button id="integrationGoogleLogin" class="bg-white border border-gray-300 shadow-sm px-6 py-2 !rounded-button whitespace-nowrap hover:bg-gray-50 transition-colors">
-<span class="flex items-center">
-<span class="w-5 h-5 flex items-center justify-center mr-2">
-<i class="ri-google-fill text-red-500"></i>
-</span>
-<span id="integrationLoginText">Se connecter avec Google</span>
-</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-</main>
-<!-- Footer -->
-<footer class="bg-white border-t border-gray-200 mt-8">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-<p class="text-center text-sm text-gray-500">© 2025 Système de Facturation - Tous droits réservés</p>
-</div>
-</footer>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-let isLoggedIn = false;
-let userName = '';
-function handleGoogleLogin() {
-  const clientId = '271756944260-sv1jc8o18emuk6ojb4oofcprp365a4q8.apps.googleusercontent.com';
-  const redirectUri = encodeURIComponent(window.location.origin);
-  const scope = encodeURIComponent('profile email https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets');
-  const responseType = 'code';
-  const accessType = 'offline';
-  const prompt = 'consent';
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&access_type=${accessType}&prompt=${prompt}`;
-  const width = 500;
-  const height = 600;
-  const left = (window.innerWidth - width) / 2;
-  const top = (window.innerHeight - height) / 2;
-  const popup = window.open(
-    authUrl,
-    'Google Login',
-    `width=${width},height=${height},left=${left},top=${top}`
-  );
-if (popup) {
-    window.addEventListener('message', function(event) {
-      if (event.origin !== window.location.origin) return;
-      
-      if (event.data.type === 'oauth-callback') {
-        const code = event.data.code;
-        
-        fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Système de Facturation</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4F46E5", secondary: "#6B7280" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
           },
-          body: new URLSearchParams({
-            code: code,
-            client_id: clientId,
-            client_secret: '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',
-            redirect_uri: window.location.origin,
-            grant_type: 'authorization_code',
-          }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          const accessToken = data.access_token;
-          
-          return fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+      }
+      input[type="number"] { -moz-appearance: textfield; }
+      body {
+      background-color: #f9fafb;
+      }
+      .custom-date::-webkit-calendar-picker-indicator {
+      background-position: right;
+      background-size: auto;
+      cursor: pointer;
+      position: absolute;
+      right: 10px;
+      }
+      .custom-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      }
+      .custom-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      }
+      .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e7eb;
+      transition: .4s;
+      border-radius: 24px;
+      }
+      .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      }
+      input:checked + .slider {
+      background-color: #4F46E5;
+      }
+      input:checked + .slider:before {
+      transform: translateX(26px);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            Système de Facturation
+          </h1>
+          <p class="text-gray-600">
+            Générez une nouvelle facture en quelques secondes
+          </p>
+        </div>
+        <div class="mt-4 md:mt-0 flex space-x-3">
+          <button
+            id="newInvoiceBtn"
+            class="bg-primary text-white px-4 py-2 flex items-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-add-line"></i>
+            </div>
+            Nouvelle Facture
+          </button>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex flex-col md:flex-row justify-between mb-6">
+          <div class="mb-4 md:mb-0">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Ajouter un logo</label
+            >
+            <div class="flex items-center">
+              <div
+                id="logoContainer"
+                class="w-32 h-32 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative"
+              >
+                <input
+                  type="file"
+                  id="logoInput"
+                  accept="image/*"
+                  class="hidden"
+                />
+                <div id="logoPlaceholder" class="text-center">
+                  <div
+                    class="w-8 h-8 mx-auto flex items-center justify-center text-gray-400"
+                  >
+                    <i class="ri-image-add-line ri-lg"></i>
+                  </div>
+                  <span class="text-xs text-gray-500"
+                    >Cliquez pour ajouter</span
+                  >
+                </div>
+                <img
+                  id="logoPreview"
+                  class="hidden w-full h-full object-contain p-2"
+                  src=""
+                  alt="Logo"
+                />
+                <button
+                  id="removeLogoBtn"
+                  class="hidden absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                >
+                  <div
+                    class="w-4 h-4 flex items-center justify-center text-red-500"
+                  >
+                    <i class="ri-close-line"></i>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Type de facture</label
+              >
+              <div class="relative">
+                <div
+                  class="flex items-center border border-gray-300 rounded p-2 w-full"
+                >
+                  <span class="flex-grow">Facture</span>
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-gray-500"
+                  >
+                    <i class="ri-arrow-down-s-line"></i>
+                  </div>
+                </div>
+                <div
+                  class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg"
+                >
+                  <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
+                    Facture
+                  </div>
+                  <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
+                    Devis
+                  </div>
+                  <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
+                    Reçu
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label
+                for="invoiceNumber"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Numéro de facture</label
+              >
+              <input
+                type="text"
+                id="invoiceNumber"
+                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="FACT-0001"
+              />
+            </div>
+            <div>
+              <label
+                for="invoiceDate"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Date</label
+              >
+              <div class="relative">
+                <input
+                  type="date"
+                  id="invoiceDate"
+                  class="custom-date border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value="2025-05-20"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-8">
+          <h2 class="text-lg font-medium text-gray-900 mb-3">Client</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                for="clientName"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Nom du client</label
+              >
+              <input
+                type="text"
+                id="clientName"
+                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Société Maroc Télécom"
+              />
+            </div>
+            <div>
+              <label
+                for="clientICE"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >ICE du client</label
+              >
+              <input
+                type="text"
+                id="clientICE"
+                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="001234567890123"
+              />
+            </div>
+            <div class="md:col-span-2">
+              <label
+                for="clientAddress"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Adresse du client</label
+              >
+              <textarea
+                id="clientAddress"
+                rows="2"
+                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Avenue Annakhil, Hay Riad, Rabat"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="mb-8">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-lg font-medium text-gray-900">Lignes de facture</h2>
+            <div class="flex items-center">
+              <label class="block text-sm font-medium text-gray-700 mr-2"
+                >TVA (%):</label
+              >
+              <input
+                type="number"
+                id="vatRate"
+                class="border border-gray-300 rounded p-2 w-16 focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                value="20"
+              />
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Désignation
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Prix unitaire
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Quantité
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Total
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-10"
+                  ></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200" id="invoiceLines">
+                <tr>
+                  <td class="px-4 py-3">
+                    <input
+                      type="text"
+                      class="item-description border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Description du produit ou service"
+                    />
+                  </td>
+                  <td class="px-4 py-3">
+                    <input
+                      type="number"
+                      class="item-price border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                      placeholder="0"
+                      value="0"
+                    />
+                  </td>
+                  <td class="px-4 py-3">
+                    <input
+                      type="number"
+                      class="item-quantity border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                      placeholder="1"
+                      value="1"
+                    />
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="item-total text-right font-medium">0.00 DH</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <button class="remove-line text-red-500 hover:text-red-700">
+                      <div class="w-5 h-5 flex items-center justify-center">
+                        <i class="ri-delete-bin-line"></i>
+                      </div>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-3">
+            <button
+              id="addLineBtn"
+              class="text-primary flex items-center !rounded-button whitespace-nowrap"
+            >
+              <div class="w-5 h-5 flex items-center justify-center mr-1">
+                <i class="ri-add-line"></i>
+              </div>
+              Ajouter une ligne
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900 mb-3">
+              Informations du vendeur
+            </h2>
+            <div class="space-y-3">
+              <div>
+                <label
+                  for="sellerName"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Nom ou entreprise</label
+                >
+                <input
+                  type="text"
+                  id="sellerName"
+                  class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Agence Digitale Casablanca"
+                />
+              </div>
+              <div>
+                <label
+                  for="sellerEmail"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Email</label
+                >
+                <input
+                  type="email"
+                  id="sellerEmail"
+                  class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="contact@agencedigitale.ma"
+                />
+              </div>
+              <div>
+                <label
+                  for="sellerPhone"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Téléphone</label
+                >
+                <input
+                  type="tel"
+                  id="sellerPhone"
+                  class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="+212 522 123 456"
+                />
+              </div>
+              <div>
+                <label
+                  for="sellerAddress"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Adresse</label
+                >
+                <textarea
+                  id="sellerAddress"
+                  rows="2"
+                  class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Quartier Gauthier, Casablanca, Maroc"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 class="text-lg font-medium text-gray-900 mb-3">
+              Informations supplémentaires
+            </h2>
+            <div>
+              <textarea
+                id="additionalInfo"
+                rows="4"
+                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Conditions de paiement, délais, ou toute autre information pertinente..."
+              ></textarea>
+            </div>
+            <div class="mt-6">
+              <h2 class="text-lg font-medium text-gray-900 mb-3">
+                Résumé de la facture
+              </h2>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex justify-between py-2">
+                  <span class="text-gray-600">Total HT :</span>
+                  <span id="subtotal" class="font-medium">0.00 DH</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-200">
+                  <span class="text-gray-600">TVA (20%):</span>
+                  <span id="vat" class="font-medium">0.00 DH</span>
+                </div>
+                <div class="flex justify-between py-2 text-lg font-bold">
+                  <span>Total TTC :</span>
+                  <span id="total" class="text-primary">0.00 DH</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+          <button
+            id="generatePdfBtn"
+            class="bg-primary text-white px-6 py-3 flex items-center justify-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-file-pdf-line"></i>
+            </div>
+            Générer la facture (PDF)
+          </button>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+          <script>
+            let logoImage = null;
+            document.addEventListener("DOMContentLoaded", function () {
+              const logoContainer = document.getElementById("logoContainer");
+              const logoInput = document.getElementById("logoInput");
+              const logoPreview = document.getElementById("logoPreview");
+              const logoPlaceholder = document.getElementById("logoPlaceholder");
+              const removeLogoBtn = document.getElementById("removeLogoBtn");
+              logoContainer.addEventListener("click", function (e) {
+                if (e.target.closest("#removeLogoBtn")) return;
+                logoInput.click();
+              });
+              logoInput.addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith("image/")) {
+                  const reader = new FileReader();
+                  reader.onload = function (e) {
+                    logoImage = e.target.result;
+                    logoPreview.src = logoImage;
+                    logoPreview.classList.remove("hidden");
+                    logoPlaceholder.classList.add("hidden");
+                    removeLogoBtn.classList.remove("hidden");
+                  };
+                  reader.readAsDataURL(file);
+                }
+              });
+              removeLogoBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                logoImage = null;
+                logoInput.value = "";
+                logoPreview.classList.add("hidden");
+                logoPlaceholder.classList.remove("hidden");
+                removeLogoBtn.classList.add("hidden");
+              });
+            });
+            function generatePDF() {
+              window.jsPDF = window.jspdf.jsPDF;
+              const doc = new jsPDF();
+              if (logoImage) {
+                doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
+              }
+              doc.setFontSize(24);
+              doc.setFont("helvetica", "bold");
+              doc.text("FACTURE", 105, 20, { align: "center" });
+              // Add invoice details
+              doc.setFontSize(10);
+              doc.setFont("helvetica", "normal");
+              doc.text(`Numéro: ${document.getElementById("invoiceNumber").value}`, 20, 40);
+              doc.text(`Date: ${document.getElementById("invoiceDate").value}`, 20, 45);
+              // Add client information
+              doc.setFont("helvetica", "bold");
+              doc.text("Client:", 20, 60);
+              doc.setFont("helvetica", "normal");
+              doc.text(document.getElementById("clientName").value, 20, 65);
+              doc.text(document.getElementById("clientICE").value, 20, 70);
+              doc.text(document.getElementById("clientAddress").value, 20, 75);
+              // Add seller information
+              doc.setFont("helvetica", "bold");
+              doc.text("Vendeur:", 120, 60);
+              doc.setFont("helvetica", "normal");
+              doc.text(document.getElementById("sellerName").value, 120, 65);
+              doc.text(document.getElementById("sellerEmail").value, 120, 70);
+              doc.text(document.getElementById("sellerPhone").value, 120, 75);
+              doc.text(document.getElementById("sellerAddress").value, 120, 80);
+              // Prepare table data
+              const tableData = [];
+              document.querySelectorAll("#invoiceLines tr").forEach((row) => {
+                const description = row.querySelector(".item-description").value;
+                const price = row.querySelector(".item-price").value;
+                const quantity = row.querySelector(".item-quantity").value;
+                const total = row.querySelector(".item-total").textContent;
+                tableData.push([description, price, quantity, total]);
+              });
+              // Add table
+              doc.autoTable({
+                startY: 90,
+                head: [["Description", "Prix unitaire", "Quantité", "Total"]],
+                body: tableData,
+                theme: "striped",
+                headStyles: { fillColor: [79, 70, 229] },
+              });
+              // Add totals
+              const finalY = doc.lastAutoTable.finalY + 10;
+              doc.text(
+                `Total HT: ${document.getElementById("subtotal").textContent}`,
+                140,
+                finalY,
+              );
+              doc.text(
+                `TVA (${document.getElementById("vatRate").value}%): ${document.getElementById("vat").textContent}`,
+                140,
+                finalY + 5,
+              );
+              doc.setFont("helvetica", "bold");
+              doc.text(
+                `Total TTC: ${document.getElementById("total").textContent}`,
+                140,
+                finalY + 10,
+              );
+              // Add additional information
+              if (document.getElementById("additionalInfo").value) {
+                doc.setFont("helvetica", "normal");
+                doc.text("Informations supplémentaires:", 20, finalY + 20);
+                doc.text(document.getElementById("additionalInfo").value, 20, finalY + 25);
+              }
+              // Save the PDF
+              const fileName = `${document.getElementById("invoiceNumber").value || "facture"}.pdf`;
+              doc.save(fileName);
+            }
+          </script>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Format date
+        const today = new Date();
+        const formattedDate = today.toISOString().split("T")[0];
+        document.getElementById("invoiceDate").value = formattedDate;
+        // Add line button
+        document.getElementById("addLineBtn").addEventListener("click", function () {
+          addNewLine();
+          calculateTotals();
+        });
+        // Initial calculation
+        calculateTotals();
+        // Event delegation for remove buttons and input changes
+        document
+          .getElementById("invoiceLines")
+          .addEventListener("click", function (e) {
+            if (e.target.closest(".remove-line")) {
+              const row = e.target.closest("tr");
+              if (document.querySelectorAll("#invoiceLines tr").length > 1) {
+                row.remove();
+                calculateTotals();
+              }
             }
           });
-        })
-        .then(response => response.json())
-        .then(data => {
-          isLoggedIn = true;
-          userName = data.name;
-          updateLoginState();
-          popup.close();
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          popup.close();
+        document
+          .getElementById("invoiceLines")
+          .addEventListener("input", function (e) {
+            if (
+              e.target.classList.contains("item-price") ||
+              e.target.classList.contains("item-quantity")
+            ) {
+              const row = e.target.closest("tr");
+              updateLineTotal(row);
+              calculateTotals();
+            }
+          });
+        document.getElementById("vatRate").addEventListener("input", function () {
+          calculateTotals();
         });
+        // PDF and WhatsApp buttons
+        document
+          .getElementById("generatePdfBtn")
+          .addEventListener("click", function () {
+            alert("Génération du PDF en cours...");
+          });
+        async function generatePDF() {
+          window.jsPDF = window.jspdf.jsPDF;
+          const doc = new jsPDF();
+          if (logoImage) {
+            doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
+          }
+          doc.setFontSize(24);
+          doc.setFont("helvetica", "bold");
+          doc.text("FACTURE", 105, 20, { align: "center" });
+          // Rest of your PDF generation code...
+          return doc.output("blob");
+        }
+        document
+          .getElementById("newInvoiceBtn")
+          .addEventListener("click", function () {
+            resetForm();
+          });
+      });
+      function addNewLine() {
+        const tbody = document.getElementById("invoiceLines");
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+      <td class="px-4 py-3">
+      <input type="text" class="item-description border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Description du produit ou service">
+      </td>
+      <td class="px-4 py-3">
+      <input type="number" class="item-price border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right" placeholder="0" value="0">
+      </td>
+      <td class="px-4 py-3">
+      <input type="number" class="item-quantity border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right" placeholder="1" value="1">
+      </td>
+      <td class="px-4 py-3">
+      <div class="item-total text-right font-medium">0.00 DH</div>
+      </td>
+      <td class="px-4 py-3">
+      <button class="remove-line text-red-500 hover:text-red-700">
+      <div class="w-5 h-5 flex items-center justify-center">
+      <i class="ri-delete-bin-line"></i>
+      </div>
+      </button>
+      </td>
+      `;
+        tbody.appendChild(newRow);
       }
-    });
-  }
-}
-function updateLoginState() {
-const headerLoginText = document.getElementById('headerLoginText');
-const integrationLoginText = document.getElementById('integrationLoginText');
-const headerGoogleLogin = document.getElementById('headerGoogleLogin');
-const integrationGoogleLogin = document.getElementById('integrationGoogleLogin');
-if (isLoggedIn) {
-headerLoginText.textContent = userName;
-integrationLoginText.textContent = userName;
-headerGoogleLogin.classList.remove('bg-primary');
-headerGoogleLogin.classList.add('bg-green-600');
-integrationGoogleLogin.classList.add('bg-green-50');
-integrationGoogleLogin.classList.add('border-green-200');
-}
-}
-document.getElementById('headerGoogleLogin').addEventListener('click', handleGoogleLogin);
-document.getElementById('integrationGoogleLogin').addEventListener('click', handleGoogleLogin);
-// Calculate totals
-function calculateTotals() {
-const rows = document.querySelectorAll('tbody tr');
-let totalHT = 0;
-rows.forEach(row => {
-const priceInput = row.querySelector('td:nth-child(2) input');
-const quantityInput = row.querySelector('td:nth-child(3) input');
-const totalCell = row.querySelector('td:nth-child(4)');
-const price = parseFloat(priceInput.value) || 0;
-const quantity = parseFloat(quantityInput.value) || 0;
-const lineTotal = price * quantity;
-totalHT += lineTotal;
-totalCell.textContent = lineTotal.toFixed(2) + ' DH';
-});
-const tvaRate = parseFloat(document.querySelector('input[type="number"][value="20"]').value) || 0;
-const tvaAmount = totalHT * (tvaRate / 100);
-const totalTTC = totalHT + tvaAmount;
-document.querySelectorAll('.space-y-2 .flex')[0].querySelector('span:last-child').textContent = totalHT.toFixed(2) + ' DH';
-document.querySelectorAll('.space-y-2 .flex')[1].querySelector('span:last-child').textContent = tvaAmount.toFixed(2) + ' DH';
-document.querySelectorAll('.space-y-2 .flex')[2].querySelector('span:last-child').textContent = totalTTC.toFixed(2) + ' DH';
-}
-// Add event listeners to price and quantity inputs
-const priceInputs = document.querySelectorAll('td:nth-child(2) input');
-const quantityInputs = document.querySelectorAll('td:nth-child(3) input');
-priceInputs.forEach(input => {
-input.addEventListener('input', calculateTotals);
-});
-quantityInputs.forEach(input => {
-input.addEventListener('input', calculateTotals);
-});
-// Add new line
-const addLineButton = document.querySelector('button.text-primary');
-addLineButton.addEventListener('click', function() {
-const tbody = document.querySelector('tbody');
-const newRow = document.createElement('tr');
-newRow.innerHTML = `
-<td class="px-4 py-3 whitespace-nowrap">
-<input type="text" class="w-full border-none focus:ring-0 text-sm" placeholder="Description du produit ou service">
-</td>
-<td class="px-4 py-3 whitespace-nowrap">
-<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" placeholder="0.00">
-</td>
-<td class="px-4 py-3 whitespace-nowrap">
-<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" value="1">
-</td>
-<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">0.00 DH</td>
-<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-<button class="text-red-500 hover:text-red-700">
-<span class="w-5 h-5 flex items-center justify-center">
-<i class="ri-delete-bin-line"></i>
-</span>
-</button>
-</td>
-`;
-tbody.appendChild(newRow);
-// Add event listeners to new inputs
-const newPriceInput = newRow.querySelector('td:nth-child(2) input');
-const newQuantityInput = newRow.querySelector('td:nth-child(3) input');
-newPriceInput.addEventListener('input', calculateTotals);
-newQuantityInput.addEventListener('input', calculateTotals);
-// Add event listener to delete button
-const deleteButton = newRow.querySelector('button.text-red-500');
-deleteButton.addEventListener('click', function() {
-newRow.remove();
-calculateTotals();
-});
-});
-// Add event listener to existing delete buttons
-const deleteButtons = document.querySelectorAll('button.text-red-500');
-deleteButtons.forEach(button => {
-button.addEventListener('click', function() {
-const row = button.closest('tr');
-row.remove();
-calculateTotals();
-});
-});
-// Initialize calculations
-calculateTotals();
-});
-</script>
-</body>
+      function updateLineTotal(row) {
+        const price = parseFloat(row.querySelector(".item-price").value) || 0;
+        const quantity = parseFloat(row.querySelector(".item-quantity").value) || 0;
+        const total = price * quantity;
+        row.querySelector(".item-total").textContent = total.toFixed(2) + " DH";
+      }
+      function calculateTotals() {
+        let subtotal = 0;
+        document.querySelectorAll("#invoiceLines tr").forEach((row) => {
+          const price = parseFloat(row.querySelector(".item-price").value) || 0;
+          const quantity = parseFloat(row.querySelector(".item-quantity").value) || 0;
+          const lineTotal = price * quantity;
+          row.querySelector(".item-total").textContent = lineTotal.toFixed(2) + " DH";
+          subtotal += lineTotal;
+        });
+        const vatRate = parseFloat(document.getElementById("vatRate").value) || 0;
+        const vatAmount = subtotal * (vatRate / 100);
+        const total = subtotal + vatAmount;
+        document.getElementById("subtotal").textContent = subtotal.toFixed(2) + " DH";
+        document.getElementById("vat").textContent = vatAmount.toFixed(2) + " DH";
+        document.getElementById("total").textContent = total.toFixed(2) + " DH";
+      }
+      function resetForm() {
+        // Reset client info
+        document.getElementById("clientName").value = "";
+        document.getElementById("clientICE").value = "";
+        document.getElementById("clientAddress").value = "";
+        // Reset invoice number
+        const randomNum = Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0");
+        document.getElementById("invoiceNumber").value = "FACT-" + randomNum;
+        // Reset date to today
+        const today = new Date();
+        const formattedDate = today.toISOString().split("T")[0];
+        document.getElementById("invoiceDate").value = formattedDate;
+        // Reset invoice lines
+        const tbody = document.getElementById("invoiceLines");
+        tbody.innerHTML = "";
+        addNewLine();
+        // Reset seller info
+        document.getElementById("sellerName").value = "";
+        document.getElementById("sellerEmail").value = "";
+        document.getElementById("sellerPhone").value = "";
+        document.getElementById("sellerAddress").value = "";
+        // Reset additional info
+        document.getElementById("additionalInfo").value = "";
+        // Reset totals
+        calculateTotals();
+        // Set focus on client name
+        document.getElementById("clientName").focus();
+      }
+    </script>
+  </body>
 </html>
