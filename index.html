@@ -82,9 +82,13 @@
         </form>
 
         <div id="invoiceOutput"></div>
+
+        <!-- Bouton pour connecter à Google Sheets -->
+        <button id="googleSheetsConnect" style="display:none;">Connecter à Google Sheets</button>
     </div>
 
     <script>
+        // Fonction pour gérer la soumission du formulaire
         document.getElementById("invoiceForm").addEventListener("submit", function(e) {
             e.preventDefault();
 
@@ -95,7 +99,7 @@
             const vat = document.getElementById("vat").value;
             const itemDetails = document.getElementById("itemDetails").value;
 
-            // Créer une facture simple
+            // Créer une facture
             const invoiceData = {
                 invoiceNumber,
                 clientDetails,
@@ -114,19 +118,15 @@
                 <p><strong>Détails des Articles:</strong> ${invoiceData.itemDetails}</p>
             `;
 
-            // Optionnel: Envoi des données à un fichier JSON ou une base de données via une API ou GitHub
-            sendDataToGitHub(invoiceData);
+            // Afficher le bouton pour connecter à Google Sheets
+            document.getElementById("googleSheetsConnect").style.display = "inline-block";
         });
 
-        // Fonction pour envoyer les données à un fichier JSON ou serveur (en simulant un appel API)
-        function sendDataToGitHub(invoiceData) {
-            // Simule l'envoi des données (remplacer par l'API ou logique de sauvegarde réelle)
-            console.log("Données envoyées:", invoiceData);
-
-            // Exemple: Si vous avez une API ou GitHub Pages pour stocker, vous l'utilisez ici
-            // Exemple d'appel API fictif (ici on remplace par un console.log)
-            alert("Données envoyées avec succès à GitHub ou base de données!");
-        }
+        // Fonction pour connecter Google Sheets
+        document.getElementById("googleSheetsConnect").addEventListener("click", function() {
+            // Rediriger vers l'authentification OAuth de Google pour connecter le compte
+            window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=token&scope=https://www.googleapis.com/auth/spreadsheets";
+        });
     </script>
 
 </body>
