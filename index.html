@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Système de Facturation</title>
+    <title>Connexion - Système de Facturation</title>
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
       tailwind.config = {
@@ -26,6 +26,17 @@
         },
       };
     </script>
+    <style>
+      .login-container {
+      display: none;
+      }
+      .invoice-container {
+      display: none;
+      }
+      .active {
+      display: block;
+      }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -96,768 +107,791 @@
     </style>
   </head>
   <body class="min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-      <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            Système de Facturation
-          </h1>
-          <p class="text-gray-600">
-            Générez une nouvelle facture en quelques secondes
-          </p>
+    <div
+      id="loginContainer"
+      class="login-container active min-h-screen flex items-center justify-center bg-gray-50"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Connexion</h1>
+          <p class="text-gray-600">Accédez à votre espace de facturation</p>
         </div>
-        <div class="mt-4 md:mt-0 flex space-x-3">
+        <form id="loginForm" class="space-y-6">
+          <div>
+            <label
+              for="username"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Nom d'utilisateur</label
+            >
+            <input
+              type="text"
+              id="username"
+              class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Mot de passe</label
+            >
+            <input
+              type="password"
+              id="password"
+              class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+              required
+            />
+          </div>
+          <div>
+            <button
+              type="submit"
+              class="w-full bg-primary text-white py-2 !rounded-button hover:bg-primary/90 transition-colors"
+            >
+              Se connecter
+            </button>
+          </div>
+        </form>
+        <div class="mt-6">
           <button
-            id="newInvoiceBtn"
-            class="bg-primary text-white px-4 py-2 flex items-center !rounded-button whitespace-nowrap"
+            id="demoButton"
+            class="w-full border border-gray-300 text-gray-700 py-2 !rounded-button hover:bg-gray-50 transition-colors"
           >
-            <div class="w-5 h-5 flex items-center justify-center mr-2">
-              <i class="ri-add-line"></i>
-            </div>
-            Nouvelle Facture
+            Accéder au compte démo (2 minutes)
           </button>
         </div>
       </div>
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="flex flex-col md:flex-row justify-between mb-6">
-          <div class="mb-4 md:mb-0">
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Ajouter un logo</label
-            >
-            <div class="flex items-center">
-              <div
-                id="logoContainer"
-                class="w-32 h-32 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative"
-              >
-                <input
-                  type="file"
-                  id="logoInput"
-                  accept="image/*"
-                  class="hidden"
-                />
-                <div id="logoPlaceholder" class="text-center">
-                  <div
-                    class="w-8 h-8 mx-auto flex items-center justify-center text-gray-400"
-                  >
-                    <i class="ri-image-add-line ri-lg"></i>
-                  </div>
-                  <span class="text-xs text-gray-500"
-                    >Cliquez pour ajouter</span
-                  >
-                </div>
-                <img
-                  id="logoPreview"
-                  class="hidden w-full h-full object-contain p-2"
-                  src=""
-                  alt="Logo"
-                />
-                <button
-                  id="removeLogoBtn"
-                  class="hidden absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
-                >
-                  <div
-                    class="w-4 h-4 flex items-center justify-center text-red-500"
-                  >
-                    <i class="ri-close-line"></i>
-                  </div>
-                </button>
-              </div>
+    </div>
+    <div id="invoiceContainer" class="invoice-container">
+      <div
+        id="demoIndicator"
+        class="hidden bg-yellow-100 text-yellow-800 py-2 px-4 text-center text-sm"
+      >
+        <div class="container mx-auto flex items-center justify-between">
+          <div class="flex items-center">
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-timer-line"></i>
             </div>
+            <span
+              >Mode démo - Session expire dans
+              <span id="demoTimer">120</span> secondes</span
+            >
           </div>
+          <button
+            id="logoutBtn"
+            class="text-gray-600 hover:text-gray-800 flex items-center"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-1">
+              <i class="ri-logout-box-line"></i>
+            </div>
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </div>
+      <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mb-8"
+        >
           <div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Type de facture</label
-              >
-              <div class="relative">
-                <div
-                  class="flex items-center border border-gray-300 rounded p-2 w-full"
-                >
-                  <span class="flex-grow">Facture</span>
-                  <div
-                    class="w-5 h-5 flex items-center justify-center text-gray-500"
-                  >
-                    <i class="ri-arrow-down-s-line"></i>
-                  </div>
-                </div>
-                <div
-                  class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg"
-                >
-                  <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
-                    Facture
-                  </div>
-                  <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
-                    Devis
-                  </div>
-                  <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
-                    Reçu
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="mb-4">
-              <label
-                for="invoiceNumber"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Numéro de facture</label
-              >
-              <input
-                type="text"
-                id="invoiceNumber"
-                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="FACT-0001"
-              />
-            </div>
-            <div>
-              <label
-                for="invoiceDate"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Date</label
-              >
-              <div class="relative">
-                <input
-                  type="date"
-                  id="invoiceDate"
-                  class="custom-date border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                  value="2025-05-20"
-                />
-              </div>
-            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+              Système de Facturation
+            </h1>
+            <p class="text-gray-600">
+              Générez une nouvelle facture en quelques secondes
+            </p>
           </div>
-        </div>
-        <div class="mb-8">
-          <h2 class="text-lg font-medium text-gray-900 mb-3">Client</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                for="clientName"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Nom du client</label
-              >
-              <input
-                type="text"
-                id="clientName"
-                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Société Maroc Télécom"
-              />
-            </div>
-            <div>
-              <label
-                for="clientICE"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >ICE du client</label
-              >
-              <input
-                type="text"
-                id="clientICE"
-                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="001234567890123"
-              />
-            </div>
-            <div class="md:col-span-2">
-              <label
-                for="clientAddress"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Adresse du client</label
-              >
-              <textarea
-                id="clientAddress"
-                rows="2"
-                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Avenue Annakhil, Hay Riad, Rabat"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="mb-8">
-          <div class="flex justify-between items-center mb-3">
-            <h2 class="text-lg font-medium text-gray-900">Lignes de facture</h2>
-            <div class="flex items-center">
-              <label class="block text-sm font-medium text-gray-700 mr-2"
-                >TVA (%):</label
-              >
-              <input
-                type="number"
-                id="vatRate"
-                class="border border-gray-300 rounded p-2 w-16 focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                value="20"
-              />
-            </div>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Désignation
-                  </th>
-                  <th
-                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Prix unitaire
-                  </th>
-                  <th
-                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Quantité
-                  </th>
-                  <th
-                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Total
-                  </th>
-                  <th
-                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-10"
-                  ></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200" id="invoiceLines">
-                <tr>
-                  <td class="px-4 py-3">
-                    <input
-                      type="text"
-                      class="item-description border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="Description du produit ou service"
-                    />
-                  </td>
-                  <td class="px-4 py-3">
-                    <input
-                      type="number"
-                      class="item-price border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                      placeholder="0"
-                      value="0"
-                    />
-                  </td>
-                  <td class="px-4 py-3">
-                    <input
-                      type="number"
-                      class="item-quantity border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                      placeholder="1"
-                      value="1"
-                    />
-                  </td>
-                  <td class="px-4 py-3">
-                    <div class="item-total text-right font-medium">0.00 DH</div>
-                  </td>
-                  <td class="px-4 py-3">
-                    <button class="remove-line text-red-500 hover:text-red-700">
-                      <div class="w-5 h-5 flex items-center justify-center">
-                        <i class="ri-delete-bin-line"></i>
-                      </div>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="mt-3">
+          <div class="mt-4 md:mt-0 flex space-x-3">
             <button
-              id="addLineBtn"
-              class="text-primary flex items-center !rounded-button whitespace-nowrap"
+              id="newInvoiceBtn"
+              class="bg-primary text-white px-4 py-2 flex items-center !rounded-button whitespace-nowrap"
             >
-              <div class="w-5 h-5 flex items-center justify-center mr-1">
+              <div class="w-5 h-5 flex items-center justify-center mr-2">
                 <i class="ri-add-line"></i>
               </div>
-              Ajouter une ligne
+              Nouvelle Facture
             </button>
           </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <h2 class="text-lg font-medium text-gray-900 mb-3">
-              Informations du vendeur
-            </h2>
-            <div class="space-y-3">
-              <div>
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div class="flex flex-col md:flex-row justify-between mb-6">
+            <div class="mb-4 md:mb-0">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Ajouter un logo</label
+              >
+              <div class="flex items-center">
+                <div
+                  id="logoContainer"
+                  class="w-32 h-32 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative"
+                >
+                  <input
+                    type="file"
+                    id="logoInput"
+                    accept="image/*"
+                    class="hidden"
+                  />
+                  <div id="logoPlaceholder" class="text-center">
+                    <div
+                      class="w-8 h-8 mx-auto flex items-center justify-center text-gray-400"
+                    >
+                      <i class="ri-image-add-line ri-lg"></i>
+                    </div>
+                    <span class="text-xs text-gray-500"
+                      >Cliquez pour ajouter</span
+                    >
+                  </div>
+                  <img
+                    id="logoPreview"
+                    class="hidden w-full h-full object-contain p-2"
+                    src=""
+                    alt="Logo"
+                  />
+                  <button
+                    id="removeLogoBtn"
+                    class="hidden absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                  >
+                    <div
+                      class="w-4 h-4 flex items-center justify-center text-red-500"
+                    >
+                      <i class="ri-close-line"></i>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Type de facture</label
+                >
+                <div class="relative">
+                  <div
+                    class="flex items-center border border-gray-300 rounded p-2 w-full"
+                  >
+                    <span class="flex-grow">Facture</span>
+                    <div
+                      class="w-5 h-5 flex items-center justify-center text-gray-500"
+                    >
+                      <i class="ri-arrow-down-s-line"></i>
+                    </div>
+                  </div>
+                  <div
+                    class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg"
+                  >
+                    <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
+                      Facture
+                    </div>
+                    <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
+                      Devis
+                    </div>
+                    <div class="py-2 px-3 hover:bg-gray-100 cursor-pointer">
+                      Reçu
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-4">
                 <label
-                  for="sellerName"
+                  for="invoiceNumber"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Nom ou entreprise</label
+                  >Numéro de facture</label
                 >
                 <input
                   type="text"
-                  id="sellerName"
+                  id="invoiceNumber"
                   class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Agence Digitale Casablanca"
+                  placeholder="FACT-0001"
                 />
               </div>
               <div>
                 <label
-                  for="sellerEmail"
+                  for="invoiceDate"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Email</label
+                  >Date</label
+                >
+                <div class="relative">
+                  <input
+                    type="date"
+                    id="invoiceDate"
+                    class="custom-date border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                    value="2025-05-20"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-3">Client</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="clientName"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Nom du client</label
                 >
                 <input
-                  type="email"
-                  id="sellerEmail"
+                  type="text"
+                  id="clientName"
                   class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="contact@agencedigitale.ma"
+                  placeholder="Société Maroc Télécom"
                 />
               </div>
               <div>
                 <label
-                  for="sellerPhone"
+                  for="clientICE"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Téléphone</label
+                  >ICE du client</label
                 >
                 <input
-                  type="tel"
-                  id="sellerPhone"
+                  type="text"
+                  id="clientICE"
                   class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="+212 522 123 456"
+                  placeholder="001234567890123"
                 />
               </div>
-              <div>
+              <div class="md:col-span-2">
                 <label
-                  for="sellerAddress"
+                  for="clientAddress"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Adresse</label
+                  >Adresse du client</label
                 >
                 <textarea
-                  id="sellerAddress"
+                  id="clientAddress"
                   rows="2"
                   class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Quartier Gauthier, Casablanca, Maroc"
+                  placeholder="Avenue Annakhil, Hay Riad, Rabat"
                 ></textarea>
               </div>
             </div>
           </div>
-          <div>
-            <h2 class="text-lg font-medium text-gray-900 mb-3">
-              Informations supplémentaires
-            </h2>
-            <div>
-              <textarea
-                id="additionalInfo"
-                rows="4"
-                class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Conditions de paiement, délais, ou toute autre information pertinente..."
-              ></textarea>
-            </div>
-            <div class="mt-6">
-              <h2 class="text-lg font-medium text-gray-900 mb-3">
-                Résumé de la facture
+          <div class="mb-8">
+            <div class="flex justify-between items-center mb-3">
+              <h2 class="text-lg font-medium text-gray-900">
+                Lignes de facture
               </h2>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="flex justify-between py-2">
-                  <span class="text-gray-600">Total HT :</span>
-                  <span id="subtotal" class="font-medium">0.00 DH</span>
+              <div class="flex items-center">
+                <label class="block text-sm font-medium text-gray-700 mr-2"
+                  >TVA (%):</label
+                >
+                <input
+                  type="number"
+                  id="vatRate"
+                  class="border border-gray-300 rounded p-2 w-16 focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  value="20"
+                />
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Désignation
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Prix unitaire
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Quantité
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Total
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-10"
+                    ></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200" id="invoiceLines">
+                  <tr>
+                    <td class="px-4 py-3">
+                      <input
+                        type="text"
+                        class="item-description border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Description du produit ou service"
+                      />
+                    </td>
+                    <td class="px-4 py-3">
+                      <input
+                        type="number"
+                        class="item-price border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                        placeholder="0"
+                        value="0"
+                      />
+                    </td>
+                    <td class="px-4 py-3">
+                      <input
+                        type="number"
+                        class="item-quantity border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                        placeholder="1"
+                        value="1"
+                      />
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="item-total text-right font-medium">
+                        0.00 DH
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <button
+                        class="remove-line text-red-500 hover:text-red-700"
+                      >
+                        <div class="w-5 h-5 flex items-center justify-center">
+                          <i class="ri-delete-bin-line"></i>
+                        </div>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-3">
+              <button
+                id="addLineBtn"
+                class="text-primary flex items-center !rounded-button whitespace-nowrap"
+              >
+                <div class="w-5 h-5 flex items-center justify-center mr-1">
+                  <i class="ri-add-line"></i>
                 </div>
-                <div class="flex justify-between py-2 border-b border-gray-200">
-                  <span class="text-gray-600">TVA (20%):</span>
-                  <span id="vat" class="font-medium">0.00 DH</span>
+                Ajouter une ligne
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <h2 class="text-lg font-medium text-gray-900 mb-3">
+                Informations du vendeur
+              </h2>
+              <div class="space-y-3">
+                <div>
+                  <label
+                    for="sellerName"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Nom ou entreprise</label
+                  >
+                  <input
+                    type="text"
+                    id="sellerName"
+                    class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Agence Digitale Casablanca"
+                  />
                 </div>
-                <div class="flex justify-between py-2 text-lg font-bold">
-                  <span>Total TTC :</span>
-                  <span id="total" class="text-primary">0.00 DH</span>
+                <div>
+                  <label
+                    for="sellerEmail"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Email</label
+                  >
+                  <input
+                    type="email"
+                    id="sellerEmail"
+                    class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="contact@agencedigitale.ma"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="sellerPhone"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Téléphone</label
+                  >
+                  <input
+                    type="tel"
+                    id="sellerPhone"
+                    class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="+212 522 123 456"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="sellerAddress"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Adresse</label
+                  >
+                  <textarea
+                    id="sellerAddress"
+                    rows="2"
+                    class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Quartier Gauthier, Casablanca, Maroc"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h2 class="text-lg font-medium text-gray-900 mb-3">
+                Informations supplémentaires
+              </h2>
+              <div>
+                <textarea
+                  id="additionalInfo"
+                  rows="4"
+                  class="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Conditions de paiement, délais, ou toute autre information pertinente..."
+                ></textarea>
+              </div>
+              <div class="mt-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-3">
+                  Résumé de la facture
+                </h2>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="flex justify-between py-2">
+                    <span class="text-gray-600">Total HT :</span>
+                    <span id="subtotal" class="font-medium">0.00 DH</span>
+                  </div>
+                  <div
+                    class="flex justify-between py-2 border-b border-gray-200"
+                  >
+                    <span class="text-gray-600">TVA (20%):</span>
+                    <span id="vat" class="font-medium">0.00 DH</span>
+                  </div>
+                  <div class="flex justify-between py-2 text-lg font-bold">
+                    <span>Total TTC :</span>
+                    <span id="total" class="text-primary">0.00 DH</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-          <button
-            id="generatePdfBtn"
-            class="bg-primary text-white px-6 py-3 flex items-center justify-center !rounded-button whitespace-nowrap"
-            onclick="generatePDF()"
-          >
-            <div class="w-5 h-5 flex items-center justify-center mr-2">
-              <i class="ri-file-pdf-line"></i>
-            </div>
-            Générer la facture (PDF)
-          </button>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-          <script>
-            let logoImage = null;
-            document.addEventListener("DOMContentLoaded", function () {
-              const logoContainer = document.getElementById("logoContainer");
-              const logoInput = document.getElementById("logoInput");
-              const logoPreview = document.getElementById("logoPreview");
-              const logoPlaceholder = document.getElementById("logoPlaceholder");
-              const removeLogoBtn = document.getElementById("removeLogoBtn");
-              logoContainer.addEventListener("click", function (e) {
-                if (e.target.closest("#removeLogoBtn")) return;
-                logoInput.click();
-              });
-              logoInput.addEventListener("change", function (e) {
-                const file = e.target.files[0];
-                if (file && file.type.startsWith("image/")) {
-                  const reader = new FileReader();
-                  reader.onload = function (e) {
-                    logoImage = e.target.result;
-                    logoPreview.src = logoImage;
-                    logoPreview.classList.remove("hidden");
-                    logoPlaceholder.classList.add("hidden");
-                    removeLogoBtn.classList.remove("hidden");
-                  };
-                  reader.readAsDataURL(file);
-                }
-              });
-              removeLogoBtn.addEventListener("click", function (e) {
-                e.stopPropagation();
-                logoImage = null;
-                logoInput.value = "";
-                logoPreview.classList.add("hidden");
-                logoPlaceholder.classList.remove("hidden");
-                removeLogoBtn.classList.add("hidden");
-              });
-            });
-            function generatePDF() {
-              window.jsPDF = window.jspdf.jsPDF;
-              const doc = new jsPDF();
-              if (logoImage) {
-                doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
-              }
-              doc.setFontSize(24);
-              doc.setFont("helvetica", "bold");
-              doc.text("FACTURE", 105, 20, { align: "center" });
-              // Add invoice details
-              doc.setFontSize(10);
-              doc.setFont("helvetica", "normal");
-              doc.text(`Numéro: ${document.getElementById("invoiceNumber").value}`, 20, 40);
-              doc.text(`Date: ${document.getElementById("invoiceDate").value}`, 20, 45);
-              // Add client information
-              doc.setFont("helvetica", "bold");
-              doc.text("Client:", 20, 60);
-              doc.setFont("helvetica", "normal");
-              doc.text(document.getElementById("clientName").value, 20, 65);
-              doc.text(document.getElementById("clientICE").value, 20, 70);
-              doc.text(document.getElementById("clientAddress").value, 20, 75);
-              // Add seller information
-              doc.setFont("helvetica", "bold");
-              doc.text("Vendeur:", 120, 60);
-              doc.setFont("helvetica", "normal");
-              doc.text(document.getElementById("sellerName").value, 120, 65);
-              doc.text(document.getElementById("sellerEmail").value, 120, 70);
-              doc.text(document.getElementById("sellerPhone").value, 120, 75);
-              doc.text(document.getElementById("sellerAddress").value, 120, 80);
-              // Prepare table data
-              const tableData = [];
-              document.querySelectorAll("#invoiceLines tr").forEach((row) => {
-                const description = row.querySelector(".item-description").value;
-                const price = row.querySelector(".item-price").value;
-                const quantity = row.querySelector(".item-quantity").value;
-                const total = row.querySelector(".item-total").textContent;
-                tableData.push([description, price, quantity, total]);
-              });
-              // Add table
-              doc.autoTable({
-                startY: 90,
-                head: [["Description", "Prix unitaire", "Quantité", "Total"]],
-                body: tableData,
-                theme: "striped",
-                headStyles: { fillColor: [79, 70, 229] },
-              });
-              // Add totals
-              const finalY = doc.lastAutoTable.finalY + 10;
-              doc.text(
-                `Total HT: ${document.getElementById("subtotal").textContent}`,
-                140,
-                finalY,
-              );
-              doc.text(
-                `TVA (${document.getElementById("vatRate").value}%): ${document.getElementById("vat").textContent}`,
-                140,
-                finalY + 5,
-              );
-              doc.setFont("helvetica", "bold");
-              doc.text(
-                `Total TTC: ${document.getElementById("total").textContent}`,
-                140,
-                finalY + 10,
-              );
-              // Add additional information
-              if (document.getElementById("additionalInfo").value) {
-                doc.setFont("helvetica", "normal");
-                doc.text("Informations supplémentaires:", 20, finalY + 20);
-                doc.text(document.getElementById("additionalInfo").value, 20, finalY + 25);
-              }
-              // Save the PDF
-              const fileName = `${document.getElementById("invoiceNumber").value || "facture"}.pdf`;
-              doc.save(fileName);
-            }
-          </script>
-          <button
-            id="shareWhatsAppBtn"
-            class="bg-green-500 text-white px-6 py-3 flex items-center justify-center !rounded-button whitespace-nowrap"
-          >
-            <div class="w-5 h-5 flex items-center justify-center mr-2">
-              <i class="ri-whatsapp-line"></i>
-            </div>
-            Partager via WhatsApp
-          </button>
-          <div
-            id="shareModal"
-            class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
-          >
-            <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-              <h3 class="text-lg font-medium mb-4">Partage via WhatsApp</h3>
-              <p class="text-gray-600 mb-4">
-                Le PDF a été généré. Que souhaitez-vous faire ?
-              </p>
-              <div class="flex flex-col gap-3">
-                <button
-                  id="downloadPdfBtn"
-                  class="bg-primary text-white px-4 py-2 rounded flex items-center justify-center"
-                >
-                  <div class="w-5 h-5 flex items-center justify-center mr-2">
-                    <i class="ri-download-line"></i>
-                  </div>
-                  Télécharger le PDF
-                </button>
-                <button
-                  id="openWhatsAppBtn"
-                  class="bg-green-500 text-white px-4 py-2 rounded flex items-center justify-center"
-                >
-                  <div class="w-5 h-5 flex items-center justify-center mr-2">
-                    <i class="ri-whatsapp-line"></i>
-                  </div>
-                  Ouvrir WhatsApp
-                </button>
-                <button
-                  id="closeModalBtn"
-                  class="text-gray-500 hover:text-gray-700 px-4 py-2 rounded"
-                >
-                  Annuler
-                </button>
+          <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+            <button
+              id="generatePdfBtn"
+              class="bg-primary text-white px-6 py-3 flex items-center justify-center !rounded-button whitespace-nowrap"
+              onclick="generatePDF()"
+            >
+              <div class="w-5 h-5 flex items-center justify-center mr-2">
+                <i class="ri-file-pdf-line"></i>
               </div>
-            </div>
+              Générer la facture (PDF)
+            </button>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+            <script>
+              let logoImage = null;
+              document.addEventListener("DOMContentLoaded", function () {
+                const logoContainer = document.getElementById("logoContainer");
+                const logoInput = document.getElementById("logoInput");
+                const logoPreview = document.getElementById("logoPreview");
+                const logoPlaceholder = document.getElementById("logoPlaceholder");
+                const removeLogoBtn = document.getElementById("removeLogoBtn");
+                logoContainer.addEventListener("click", function (e) {
+                  if (e.target.closest("#removeLogoBtn")) return;
+                  logoInput.click();
+                });
+                logoInput.addEventListener("change", function (e) {
+                  const file = e.target.files[0];
+                  if (file && file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                      logoImage = e.target.result;
+                      logoPreview.src = logoImage;
+                      logoPreview.classList.remove("hidden");
+                      logoPlaceholder.classList.add("hidden");
+                      removeLogoBtn.classList.remove("hidden");
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                });
+                removeLogoBtn.addEventListener("click", function (e) {
+                  e.stopPropagation();
+                  logoImage = null;
+                  logoInput.value = "";
+                  logoPreview.classList.add("hidden");
+                  logoPlaceholder.classList.remove("hidden");
+                  removeLogoBtn.classList.add("hidden");
+                });
+              });
+              function generatePDF() {
+                window.jsPDF = window.jspdf.jsPDF;
+                const doc = new jsPDF();
+                if (logoImage) {
+                  doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
+                }
+                doc.setFontSize(24);
+                doc.setFont("helvetica", "bold");
+                doc.text("FACTURE", 105, 20, { align: "center" });
+                // Add invoice details
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Numéro: ${document.getElementById("invoiceNumber").value}`, 20, 40);
+                doc.text(`Date: ${document.getElementById("invoiceDate").value}`, 20, 45);
+                // Add client information
+                doc.setFont("helvetica", "bold");
+                doc.text("Client:", 20, 60);
+                doc.setFont("helvetica", "normal");
+                doc.text(document.getElementById("clientName").value, 20, 65);
+                doc.text(document.getElementById("clientICE").value, 20, 70);
+                doc.text(document.getElementById("clientAddress").value, 20, 75);
+                // Add seller information
+                doc.setFont("helvetica", "bold");
+                doc.text("Vendeur:", 120, 60);
+                doc.setFont("helvetica", "normal");
+                doc.text(document.getElementById("sellerName").value, 120, 65);
+                doc.text(document.getElementById("sellerEmail").value, 120, 70);
+                doc.text(document.getElementById("sellerPhone").value, 120, 75);
+                doc.text(document.getElementById("sellerAddress").value, 120, 80);
+                // Prepare table data
+                const tableData = [];
+                document.querySelectorAll("#invoiceLines tr").forEach((row) => {
+                  const description = row.querySelector(".item-description").value;
+                  const price = row.querySelector(".item-price").value;
+                  const quantity = row.querySelector(".item-quantity").value;
+                  const total = row.querySelector(".item-total").textContent;
+                  tableData.push([description, price, quantity, total]);
+                });
+                // Add table
+                doc.autoTable({
+                  startY: 90,
+                  head: [["Description", "Prix unitaire", "Quantité", "Total"]],
+                  body: tableData,
+                  theme: "striped",
+                  headStyles: { fillColor: [79, 70, 229] },
+                });
+                // Add totals
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.text(
+                  `Total HT: ${document.getElementById("subtotal").textContent}`,
+                  140,
+                  finalY,
+                );
+                doc.text(
+                  `TVA (${document.getElementById("vatRate").value}%): ${document.getElementById("vat").textContent}`,
+                  140,
+                  finalY + 5,
+                );
+                doc.setFont("helvetica", "bold");
+                doc.text(
+                  `Total TTC: ${document.getElementById("total").textContent}`,
+                  140,
+                  finalY + 10,
+                );
+                // Add additional information
+                if (document.getElementById("additionalInfo").value) {
+                  doc.setFont("helvetica", "normal");
+                  doc.text("Informations supplémentaires:", 20, finalY + 20);
+                  doc.text(document.getElementById("additionalInfo").value, 20, finalY + 25);
+                }
+                // Save the PDF
+                const fileName = `${document.getElementById("invoiceNumber").value || "facture"}.pdf`;
+                doc.save(fileName);
+              }
+            </script>
           </div>
         </div>
       </div>
-    </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Format date
-        const today = new Date();
-        const formattedDate = today.toISOString().split("T")[0];
-        document.getElementById("invoiceDate").value = formattedDate;
-        // Add line button
-        document.getElementById("addLineBtn").addEventListener("click", function () {
-          addNewLine();
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          // Format date
+          const today = new Date();
+          const formattedDate = today.toISOString().split("T")[0];
+          document.getElementById("invoiceDate").value = formattedDate;
+          // Add line button
+          document.getElementById("addLineBtn").addEventListener("click", function () {
+            addNewLine();
+            calculateTotals();
+          });
+          // Initial calculation
           calculateTotals();
-        });
-        // Initial calculation
-        calculateTotals();
-        // Event delegation for remove buttons and input changes
-        document
-          .getElementById("invoiceLines")
-          .addEventListener("click", function (e) {
-            if (e.target.closest(".remove-line")) {
-              const row = e.target.closest("tr");
-              if (document.querySelectorAll("#invoiceLines tr").length > 1) {
-                row.remove();
+          // Event delegation for remove buttons and input changes
+          document
+            .getElementById("invoiceLines")
+            .addEventListener("click", function (e) {
+              if (e.target.closest(".remove-line")) {
+                const row = e.target.closest("tr");
+                if (document.querySelectorAll("#invoiceLines tr").length > 1) {
+                  row.remove();
+                  calculateTotals();
+                }
+              }
+            });
+          document
+            .getElementById("invoiceLines")
+            .addEventListener("input", function (e) {
+              if (
+                e.target.classList.contains("item-price") ||
+                e.target.classList.contains("item-quantity")
+              ) {
+                const row = e.target.closest("tr");
+                updateLineTotal(row);
                 calculateTotals();
               }
-            }
+            });
+          document.getElementById("vatRate").addEventListener("input", function () {
+            calculateTotals();
           });
-        document
-          .getElementById("invoiceLines")
-          .addEventListener("input", function (e) {
-            if (
-              e.target.classList.contains("item-price") ||
-              e.target.classList.contains("item-quantity")
-            ) {
-              const row = e.target.closest("tr");
-              updateLineTotal(row);
-              calculateTotals();
-            }
-          });
-        document.getElementById("vatRate").addEventListener("input", function () {
-          calculateTotals();
+          // PDF and WhatsApp buttons
+          document
+            .getElementById("newInvoiceBtn")
+            .addEventListener("click", function () {
+              resetForm();
+            });
         });
-        // PDF and WhatsApp buttons
-        document
-          .getElementById("generatePdfBtn")
-          .addEventListener("click", function () {
-            alert("Génération du PDF en cours...");
-          });
-        document.addEventListener("DOMContentLoaded", function () {
-          const shareModal = document.getElementById("shareModal");
-          const shareWhatsAppBtn = document.getElementById("shareWhatsAppBtn");
-          const downloadPdfBtn = document.getElementById("downloadPdfBtn");
-          const openWhatsAppBtn = document.getElementById("openWhatsAppBtn");
-          const closeModalBtn = document.getElementById("closeModalBtn");
-          let generatedPdfBlob = null;
-          shareWhatsAppBtn.addEventListener("click", async function () {
-            try {
-              const doc = new window.jspdf.jsPDF();
-              if (logoImage) {
-                doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
-              }
-              doc.setFontSize(24);
-              doc.setFont("helvetica", "bold");
-              doc.text("FACTURE", 105, 20, { align: "center" });
-              doc.setFontSize(10);
-              doc.setFont("helvetica", "normal");
-              doc.text(
-                `Numéro: ${document.getElementById("invoiceNumber").value}`,
-                20,
-                40,
-              );
-              doc.text(
-                `Date: ${document.getElementById("invoiceDate").value}`,
-                20,
-                45,
-              );
-              const tableData = [];
-              document.querySelectorAll("#invoiceLines tr").forEach((row) => {
-                const description = row.querySelector(".item-description").value;
-                const price = row.querySelector(".item-price").value;
-                const quantity = row.querySelector(".item-quantity").value;
-                const total = row.querySelector(".item-total").textContent;
-                tableData.push([description, price, quantity, total]);
-              });
-              doc.autoTable({
-                startY: 90,
-                head: [["Description", "Prix unitaire", "Quantité", "Total"]],
-                body: tableData,
-                theme: "striped",
-                headStyles: { fillColor: [79, 70, 229] },
-              });
-              generatedPdfBlob = doc.output("blob");
-              const file = new File([generatedPdfBlob], "facture.pdf", {
-                type: "application/pdf",
-              });
-              if (navigator.share && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                  files: [file],
-                  title: "Facture",
-                  text: "Voici votre facture",
-                });
-              } else {
-                shareModal.classList.remove("hidden");
-              }
-            } catch (error) {
-              shareModal.classList.remove("hidden");
-            }
-          });
-          downloadPdfBtn.addEventListener("click", function () {
-            if (generatedPdfBlob) {
-              const url = URL.createObjectURL(generatedPdfBlob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "facture.pdf";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }
-            shareModal.classList.add("hidden");
-          });
-          openWhatsAppBtn.addEventListener("click", function () {
-            const message = encodeURIComponent("Voici votre facture");
-            window.open(`https://wa.me/?text=${message}`, "_blank");
-            shareModal.classList.add("hidden");
-          });
-          closeModalBtn.addEventListener("click", function () {
-            shareModal.classList.add("hidden");
-          });
-          window.addEventListener("click", function (event) {
-            if (event.target === shareModal) {
-              shareModal.classList.add("hidden");
-            }
-          });
-        });
-        async function generatePDF() {
-          window.jsPDF = window.jspdf.jsPDF;
-          const doc = new jsPDF();
-          if (logoImage) {
-            doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
-          }
-          doc.setFontSize(24);
-          doc.setFont("helvetica", "bold");
-          doc.text("FACTURE", 105, 20, { align: "center" });
-          // Rest of your PDF generation code...
-          return doc.output("blob");
+        function addNewLine() {
+          const tbody = document.getElementById("invoiceLines");
+          const newRow = document.createElement("tr");
+          newRow.innerHTML = `
+        <td class="px-4 py-3">
+        <input type="text" class="item-description border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Description du produit ou service">
+        </td>
+        <td class="px-4 py-3">
+        <input type="number" class="item-price border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right" placeholder="0" value="0">
+        </td>
+        <td class="px-4 py-3">
+        <input type="number" class="item-quantity border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right" placeholder="1" value="1">
+        </td>
+        <td class="px-4 py-3">
+        <div class="item-total text-right font-medium">0.00 DH</div>
+        </td>
+        <td class="px-4 py-3">
+        <button class="remove-line text-red-500 hover:text-red-700">
+        <div class="w-5 h-5 flex items-center justify-center">
+        <i class="ri-delete-bin-line"></i>
+        </div>
+        </button>
+        </td>
+        `;
+          tbody.appendChild(newRow);
         }
-        document
-          .getElementById("newInvoiceBtn")
-          .addEventListener("click", function () {
-            resetForm();
-          });
-      });
-      function addNewLine() {
-        const tbody = document.getElementById("invoiceLines");
-        const newRow = document.createElement("tr");
-        newRow.innerHTML = `
-      <td class="px-4 py-3">
-      <input type="text" class="item-description border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Description du produit ou service">
-      </td>
-      <td class="px-4 py-3">
-      <input type="number" class="item-price border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right" placeholder="0" value="0">
-      </td>
-      <td class="px-4 py-3">
-      <input type="number" class="item-quantity border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent text-right" placeholder="1" value="1">
-      </td>
-      <td class="px-4 py-3">
-      <div class="item-total text-right font-medium">0.00 DH</div>
-      </td>
-      <td class="px-4 py-3">
-      <button class="remove-line text-red-500 hover:text-red-700">
-      <div class="w-5 h-5 flex items-center justify-center">
-      <i class="ri-delete-bin-line"></i>
-      </div>
-      </button>
-      </td>
-      `;
-        tbody.appendChild(newRow);
-      }
-      function updateLineTotal(row) {
-        const price = parseFloat(row.querySelector(".item-price").value) || 0;
-        const quantity = parseFloat(row.querySelector(".item-quantity").value) || 0;
-        const total = price * quantity;
-        row.querySelector(".item-total").textContent = total.toFixed(2) + " DH";
-      }
-      function calculateTotals() {
-        let subtotal = 0;
-        document.querySelectorAll("#invoiceLines tr").forEach((row) => {
+        function updateLineTotal(row) {
           const price = parseFloat(row.querySelector(".item-price").value) || 0;
           const quantity = parseFloat(row.querySelector(".item-quantity").value) || 0;
-          const lineTotal = price * quantity;
-          row.querySelector(".item-total").textContent = lineTotal.toFixed(2) + " DH";
-          subtotal += lineTotal;
-        });
-        const vatRate = parseFloat(document.getElementById("vatRate").value) || 0;
-        const vatAmount = subtotal * (vatRate / 100);
-        const total = subtotal + vatAmount;
-        document.getElementById("subtotal").textContent = subtotal.toFixed(2) + " DH";
-        document.getElementById("vat").textContent = vatAmount.toFixed(2) + " DH";
-        document.getElementById("total").textContent = total.toFixed(2) + " DH";
-      }
-      function resetForm() {
-        // Reset client info
-        document.getElementById("clientName").value = "";
-        document.getElementById("clientICE").value = "";
-        document.getElementById("clientAddress").value = "";
-        // Reset invoice number
-        const randomNum = Math.floor(Math.random() * 10000)
-          .toString()
-          .padStart(4, "0");
-        document.getElementById("invoiceNumber").value = "FACT-" + randomNum;
-        // Reset date to today
-        const today = new Date();
-        const formattedDate = today.toISOString().split("T")[0];
-        document.getElementById("invoiceDate").value = formattedDate;
-        // Reset invoice lines
-        const tbody = document.getElementById("invoiceLines");
-        tbody.innerHTML = "";
-        addNewLine();
-        // Reset seller info
-        document.getElementById("sellerName").value = "";
-        document.getElementById("sellerEmail").value = "";
-        document.getElementById("sellerPhone").value = "";
-        document.getElementById("sellerAddress").value = "";
-        // Reset additional info
-        document.getElementById("additionalInfo").value = "";
-        // Reset totals
-        calculateTotals();
-        // Set focus on client name
-        document.getElementById("clientName").focus();
-      }
-    </script>
+          const total = price * quantity;
+          row.querySelector(".item-total").textContent = total.toFixed(2) + " DH";
+        }
+        function calculateTotals() {
+          let subtotal = 0;
+          document.querySelectorAll("#invoiceLines tr").forEach((row) => {
+            const price = parseFloat(row.querySelector(".item-price").value) || 0;
+            const quantity = parseFloat(row.querySelector(".item-quantity").value) || 0;
+            const lineTotal = price * quantity;
+            row.querySelector(".item-total").textContent = lineTotal.toFixed(2) + " DH";
+            subtotal += lineTotal;
+          });
+          const vatRate = parseFloat(document.getElementById("vatRate").value) || 0;
+          const vatAmount = subtotal * (vatRate / 100);
+          const total = subtotal + vatAmount;
+          document.getElementById("subtotal").textContent = subtotal.toFixed(2) + " DH";
+          document.getElementById("vat").textContent = vatAmount.toFixed(2) + " DH";
+          document.getElementById("total").textContent = total.toFixed(2) + " DH";
+        }
+        function resetForm() {
+          // Reset client info
+          document.getElementById("clientName").value = "";
+          document.getElementById("clientICE").value = "";
+          document.getElementById("clientAddress").value = "";
+          // Reset invoice number
+          const randomNum = Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, "0");
+          document.getElementById("invoiceNumber").value = "FACT-" + randomNum;
+          // Reset date to today
+          const today = new Date();
+          const formattedDate = today.toISOString().split("T")[0];
+          document.getElementById("invoiceDate").value = formattedDate;
+          // Reset invoice lines
+          const tbody = document.getElementById("invoiceLines");
+          tbody.innerHTML = "";
+          addNewLine();
+          // Reset seller info
+          document.getElementById("sellerName").value = "";
+          document.getElementById("sellerEmail").value = "";
+          document.getElementById("sellerPhone").value = "";
+          document.getElementById("sellerAddress").value = "";
+          // Reset additional info
+          document.getElementById("additionalInfo").value = "";
+          // Reset totals
+          calculateTotals();
+          // Set focus on client name
+          document.getElementById("clientName").focus();
+        }
+      </script>
+    </div>
   </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const loginForm = document.getElementById("loginForm");
+      const loginContainer = document.getElementById("loginContainer");
+      const invoiceContainer = document.getElementById("invoiceContainer");
+      const demoButton = document.getElementById("demoButton");
+      function showError(message) {
+        const existingError = document.querySelector(".error-message");
+        if (existingError) existingError.remove();
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message text-red-500 text-sm mt-2 text-center";
+        errorDiv.textContent = message;
+        loginForm.appendChild(errorDiv);
+        setTimeout(() => {
+          errorDiv.remove();
+        }, 3000);
+      }
+      function clearError() {
+        const existingError = document.querySelector(".error-message");
+        if (existingError) existingError.remove();
+      }
+      function showInvoiceSystem(isDemo = false) {
+        loginContainer.style.display = "none";
+        invoiceContainer.style.display = "block";
+        const demoIndicator = document.getElementById("demoIndicator");
+        if (isDemo) {
+          demoIndicator.classList.remove("hidden");
+          startDemoTimer();
+        } else {
+          demoIndicator.classList.add("hidden");
+        }
+      }
+      function showLoginForm() {
+        invoiceContainer.style.display = "none";
+        loginContainer.style.display = "flex";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        clearError();
+      }
+      loginForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const username = document
+          .getElementById("username")
+          .value.trim()
+          .toLowerCase();
+        const password = document.getElementById("password").value.trim();
+        clearError();
+        if (!username || !password) {
+          showError("Veuillez remplir tous les champs");
+          return;
+        }
+        if (username === "getquick" && password === "3388") {
+          showInvoiceSystem(false);
+        } else {
+          showError("Identifiants incorrects");
+        }
+      });
+      demoButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        clearError();
+        showInvoiceSystem(true);
+      });
+      document.getElementById("logoutBtn").addEventListener("click", function () {
+        showLoginForm();
+      });
+      function startDemoTimer() {
+        let timeLeft = 120;
+        const timerElement = document.getElementById("demoTimer");
+        const timer = setInterval(() => {
+          timeLeft--;
+          timerElement.textContent = timeLeft;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            showLoginForm();
+          }
+        }, 1000);
+      }
+      showLoginForm();
+    });
+  </script>
 </html>
