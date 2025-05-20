@@ -1,133 +1,531 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Création de Facture</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 10px;
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #invoiceOutput {
-            margin-top: 20px;
-            border-top: 2px solid #ddd;
-            padding-top: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Système de Facturation</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4f46e5',secondary:'#6366f1'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Inter', sans-serif;
+background-color: #f9fafb;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+input[type="number"] {
+-moz-appearance: textfield;
+}
+.custom-checkbox {
+position: relative;
+display: inline-block;
+width: 20px;
+height: 20px;
+margin-right: 8px;
+}
+.custom-checkbox input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+width: 20px;
+height: 20px;
+background-color: #fff;
+border: 2px solid #d1d5db;
+border-radius: 4px;
+}
+.custom-checkbox input:checked ~ .checkmark {
+background-color: #4f46e5;
+border-color: #4f46e5;
+}
+.checkmark:after {
+content: "";
+position: absolute;
+display: none;
+}
+.custom-checkbox input:checked ~ .checkmark:after {
+display: block;
+}
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 6px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+.switch {
+position: relative;
+display: inline-block;
+width: 48px;
+height: 24px;
+}
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #e5e7eb;
+transition: .4s;
+border-radius: 24px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 3px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .slider {
+background-color: #4f46e5;
+}
+input:checked + .slider:before {
+transform: translateX(24px);
+}
+</style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>Création de Facture</h1>
-        <form id="invoiceForm">
-            <label for="invoiceNumber">Numéro de Facture:</label>
-            <input type="text" id="invoiceNumber" required>
-
-            <label for="clientDetails">Détails du Client:</label>
-            <input type="text" id="clientDetails" required>
-
-            <label for="currency">Devise:</label>
-            <select id="currency">
-                <option value="DH">DH</option>
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-            </select>
-
-            <label for="vat">TVA (%):</label>
-            <input type="number" id="vat" value="20" required>
-
-            <label for="itemDetails">Détails des Articles:</label>
-            <textarea id="itemDetails" required></textarea>
-
-            <button type="submit">Générer Facture</button>
-        </form>
-
-        <div id="invoiceOutput"></div>
-
-        <!-- Bouton pour connecter à Google Sheets -->
-        <button id="googleSheetsConnect" style="display:none;">Connecter à Google Sheets</button>
-    </div>
-
-    <script>
-        // Fonction pour gérer la soumission du formulaire
-        document.getElementById("invoiceForm").addEventListener("submit", function(e) {
-            e.preventDefault();
-
-            // Récupérer les données du formulaire
-            const invoiceNumber = document.getElementById("invoiceNumber").value;
-            const clientDetails = document.getElementById("clientDetails").value;
-            const currency = document.getElementById("currency").value;
-            const vat = document.getElementById("vat").value;
-            const itemDetails = document.getElementById("itemDetails").value;
-
-            // Créer une facture
-            const invoiceData = {
-                invoiceNumber,
-                clientDetails,
-                currency,
-                vat,
-                itemDetails
-            };
-
-            // Afficher la facture
-            document.getElementById("invoiceOutput").innerHTML = `
-                <h2>Facture Générée</h2>
-                <p><strong>Numéro de Facture:</strong> ${invoiceData.invoiceNumber}</p>
-                <p><strong>Détails du Client:</strong> ${invoiceData.clientDetails}</p>
-                <p><strong>Devise:</strong> ${invoiceData.currency}</p>
-                <p><strong>TVA:</strong> ${invoiceData.vat}%</p>
-                <p><strong>Détails des Articles:</strong> ${invoiceData.itemDetails}</p>
-            `;
-
-            // Afficher le bouton pour connecter à Google Sheets
-            document.getElementById("googleSheetsConnect").style.display = "inline-block";
+<div class="min-h-screen flex flex-col">
+<!-- Header -->
+<header class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+<div class="flex items-center">
+<h1 class="text-2xl font-semibold text-gray-900">Système de Facturation</h1>
+</div>
+<div class="flex items-center space-x-4">
+<button class="bg-white text-primary border border-primary px-4 py-2 !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors">
+<span class="flex items-center">
+<span class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-file-add-line"></i>
+</span>
+Nouvelle facture
+</span>
+</button>
+<button id="headerGoogleLogin" class="bg-primary text-white px-4 py-2 !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors">
+<span class="flex items-center">
+<span class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-google-fill"></i>
+</span>
+<span id="headerLoginText">Se connecter avec Google</span>
+</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="bg-white shadow rounded-lg overflow-hidden">
+<!-- Invoice Header -->
+<div class="p-6 border-b border-gray-200">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="flex-1">
+<div class="flex items-center mb-4">
+<button class="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors">
+<span class="w-6 h-6 flex items-center justify-center">
+<i class="ri-image-add-line text-lg"></i>
+</span>
+</button>
+<span class="ml-3 text-gray-500 text-sm">Ajouter un logo</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Type de facture</label>
+<div class="relative">
+<button class="w-full bg-white border border-gray-300 rounded text-left px-4 py-2 pr-8 !rounded-button flex justify-between items-center">
+<span>Facture</span>
+<span class="w-5 h-5 flex items-center justify-center">
+<i class="ri-arrow-down-s-line"></i>
+</span>
+</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Numéro de facture</label>
+<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="Numéro de facture">
+</div>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" value="20/05/2025">
+</div>
+</div>
+</div>
+<!-- Client Information -->
+<div class="p-6 border-b border-gray-200">
+<h2 class="text-lg font-medium text-gray-900 mb-4">Client</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Nom du client</label>
+<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="Nom du client">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">ICE du client</label>
+<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="ICE du client">
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium text-gray-700 mb-1">Adresse du client</label>
+<textarea class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" rows="2" placeholder="Adresse du client"></textarea>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">TVA (%)</label>
+<input type="number" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" value="20">
+</div>
+</div>
+</div>
+<!-- Invoice Lines -->
+<div class="p-6 border-b border-gray-200">
+<h2 class="text-lg font-medium text-gray-900 mb-4">Lignes de facture</h2>
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-gray-200">
+<thead>
+<tr>
+<th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Désignation</th>
+<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Prix unitaire</th>
+<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
+<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+<th class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-gray-200">
+<tr>
+<td class="px-4 py-3 whitespace-nowrap">
+<input type="text" class="w-full border-none focus:ring-0 text-sm" placeholder="Description du produit ou service">
+</td>
+<td class="px-4 py-3 whitespace-nowrap">
+<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" placeholder="0.00">
+</td>
+<td class="px-4 py-3 whitespace-nowrap">
+<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" value="1">
+</td>
+<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">0.00 DH</td>
+<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-red-500 hover:text-red-700">
+<span class="w-5 h-5 flex items-center justify-center">
+<i class="ri-delete-bin-line"></i>
+</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-4">
+<button class="flex items-center text-primary hover:text-primary/80 text-sm font-medium">
+<span class="w-5 h-5 flex items-center justify-center mr-1">
+<i class="ri-add-line"></i>
+</span>
+Ajouter une ligne
+</button>
+</div>
+</div>
+<!-- Vendor Information -->
+<div class="p-6 border-b border-gray-200">
+<h2 class="text-lg font-medium text-gray-900 mb-4">Informations du vendeur</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Nom ou entreprise</label>
+<input type="text" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="Nom de l'entreprise">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+<input type="email" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="contact@entreprise.com">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+<input type="tel" class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" placeholder="+212 XXXXXXXXX">
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+<textarea class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" rows="2" placeholder="Adresse complète"></textarea>
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium text-gray-700 mb-1">Informations supplémentaires</label>
+<textarea class="w-full border border-gray-300 rounded px-4 py-2 !rounded-button" rows="2" placeholder="ICE, RC, Patente, etc."></textarea>
+</div>
+</div>
+</div>
+<!-- Invoice Summary -->
+<div class="p-6 bg-gray-50">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+<div class="mb-6 md:mb-0">
+<h2 class="text-lg font-medium text-gray-900 mb-4">Résumé de la facture</h2>
+<div class="space-y-2">
+<div class="flex justify-between">
+<span class="text-sm text-gray-600">Total HT:</span>
+<span class="text-sm font-medium">0.00 DH</span>
+</div>
+<div class="flex justify-between">
+<span class="text-sm text-gray-600">TVA (20%):</span>
+<span class="text-sm font-medium">0.00 DH</span>
+</div>
+<div class="flex justify-between pt-2 border-t border-gray-200">
+<span class="text-base font-medium text-gray-900">Total TTC:</span>
+<span class="text-base font-bold text-gray-900">0.00 DH</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col space-y-3">
+<button class="bg-primary text-white px-6 py-2 !rounded-button whitespace-nowrap hover:bg-primary/90 transition-colors">
+<span class="flex items-center">
+<span class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-file-pdf-line"></i>
+</span>
+Générer PDF
+</span>
+</button>
+<button class="bg-white text-primary border border-primary px-6 py-2 !rounded-button whitespace-nowrap hover:bg-primary/5 transition-colors">
+<span class="flex items-center">
+<span class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-download-line"></i>
+</span>
+Télécharger PDF
+</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Google Integration -->
+<div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
+<div class="p-6">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+<div>
+<h2 class="text-lg font-medium text-gray-900 mb-2">Intégration Google</h2>
+<p class="text-sm text-gray-600 mb-4">Connectez votre compte Google pour activer des fonctionnalités supplémentaires.</p>
+<div class="bg-blue-50 rounded-lg p-4 mb-4 md:mb-0">
+<h3 class="text-sm font-medium text-blue-800 mb-2">L'intégration avec Google vous permet de:</h3>
+<ul class="text-sm text-blue-700 space-y-1">
+<li class="flex items-start">
+<span class="w-5 h-5 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
+<i class="ri-check-line text-blue-600"></i>
+</span>
+<span>Stocker automatiquement vos factures dans Google Drive</span>
+</li>
+<li class="flex items-start">
+<span class="w-5 h-5 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
+<i class="ri-check-line text-blue-600"></i>
+</span>
+<span>Suivre toutes vos factures dans un fichier Google Sheets dédié</span>
+</li>
+<li class="flex items-start">
+<span class="w-5 h-5 flex items-center justify-center mr-2 flex-shrink-0 mt-0.5">
+<i class="ri-check-line text-blue-600"></i>
+</span>
+<span>Accéder facilement à l'historique complet de vos factures</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="mt-6 md:mt-0">
+<button id="integrationGoogleLogin" class="bg-white border border-gray-300 shadow-sm px-6 py-2 !rounded-button whitespace-nowrap hover:bg-gray-50 transition-colors">
+<span class="flex items-center">
+<span class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-google-fill text-red-500"></i>
+</span>
+<span id="integrationLoginText">Se connecter avec Google</span>
+</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 mt-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+<p class="text-center text-sm text-gray-500">© 2025 Système de Facturation - Tous droits réservés</p>
+</div>
+</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+let isLoggedIn = false;
+let userName = '';
+function handleGoogleLogin() {
+  const clientId = '271756944260-sv1jc8o18emuk6ojb4oofcprp365a4q8.apps.googleusercontent.com';
+  const redirectUri = encodeURIComponent(window.location.origin);
+  const scope = encodeURIComponent('profile email https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets');
+  const responseType = 'code';
+  const accessType = 'offline';
+  const prompt = 'consent';
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&access_type=${accessType}&prompt=${prompt}`;
+  const width = 500;
+  const height = 600;
+  const left = (window.innerWidth - width) / 2;
+  const top = (window.innerHeight - height) / 2;
+  const popup = window.open(
+    authUrl,
+    'Google Login',
+    `width=${width},height=${height},left=${left},top=${top}`
+  );
+if (popup) {
+    window.addEventListener('message', function(event) {
+      if (event.origin !== window.location.origin) return;
+      
+      if (event.data.type === 'oauth-callback') {
+        const code = event.data.code;
+        
+        fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            code: code,
+            client_id: clientId,
+            client_secret: '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',
+            redirect_uri: window.location.origin,
+            grant_type: 'authorization_code',
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          const accessToken = data.access_token;
+          
+          return fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+        })
+        .then(response => response.json())
+        .then(data => {
+          isLoggedIn = true;
+          userName = data.name;
+          updateLoginState();
+          popup.close();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          popup.close();
         });
-
-        // Fonction pour connecter Google Sheets
-        document.getElementById("googleSheetsConnect").addEventListener("click", function() {
-            // Rediriger vers l'authentification OAuth de Google pour connecter le compte
-            window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=token&scope=https://www.googleapis.com/auth/spreadsheets";
-        });
-    </script>
-
+      }
+    });
+  }
+}
+function updateLoginState() {
+const headerLoginText = document.getElementById('headerLoginText');
+const integrationLoginText = document.getElementById('integrationLoginText');
+const headerGoogleLogin = document.getElementById('headerGoogleLogin');
+const integrationGoogleLogin = document.getElementById('integrationGoogleLogin');
+if (isLoggedIn) {
+headerLoginText.textContent = userName;
+integrationLoginText.textContent = userName;
+headerGoogleLogin.classList.remove('bg-primary');
+headerGoogleLogin.classList.add('bg-green-600');
+integrationGoogleLogin.classList.add('bg-green-50');
+integrationGoogleLogin.classList.add('border-green-200');
+}
+}
+document.getElementById('headerGoogleLogin').addEventListener('click', handleGoogleLogin);
+document.getElementById('integrationGoogleLogin').addEventListener('click', handleGoogleLogin);
+// Calculate totals
+function calculateTotals() {
+const rows = document.querySelectorAll('tbody tr');
+let totalHT = 0;
+rows.forEach(row => {
+const priceInput = row.querySelector('td:nth-child(2) input');
+const quantityInput = row.querySelector('td:nth-child(3) input');
+const totalCell = row.querySelector('td:nth-child(4)');
+const price = parseFloat(priceInput.value) || 0;
+const quantity = parseFloat(quantityInput.value) || 0;
+const lineTotal = price * quantity;
+totalHT += lineTotal;
+totalCell.textContent = lineTotal.toFixed(2) + ' DH';
+});
+const tvaRate = parseFloat(document.querySelector('input[type="number"][value="20"]').value) || 0;
+const tvaAmount = totalHT * (tvaRate / 100);
+const totalTTC = totalHT + tvaAmount;
+document.querySelectorAll('.space-y-2 .flex')[0].querySelector('span:last-child').textContent = totalHT.toFixed(2) + ' DH';
+document.querySelectorAll('.space-y-2 .flex')[1].querySelector('span:last-child').textContent = tvaAmount.toFixed(2) + ' DH';
+document.querySelectorAll('.space-y-2 .flex')[2].querySelector('span:last-child').textContent = totalTTC.toFixed(2) + ' DH';
+}
+// Add event listeners to price and quantity inputs
+const priceInputs = document.querySelectorAll('td:nth-child(2) input');
+const quantityInputs = document.querySelectorAll('td:nth-child(3) input');
+priceInputs.forEach(input => {
+input.addEventListener('input', calculateTotals);
+});
+quantityInputs.forEach(input => {
+input.addEventListener('input', calculateTotals);
+});
+// Add new line
+const addLineButton = document.querySelector('button.text-primary');
+addLineButton.addEventListener('click', function() {
+const tbody = document.querySelector('tbody');
+const newRow = document.createElement('tr');
+newRow.innerHTML = `
+<td class="px-4 py-3 whitespace-nowrap">
+<input type="text" class="w-full border-none focus:ring-0 text-sm" placeholder="Description du produit ou service">
+</td>
+<td class="px-4 py-3 whitespace-nowrap">
+<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" placeholder="0.00">
+</td>
+<td class="px-4 py-3 whitespace-nowrap">
+<input type="number" class="w-full border-none focus:ring-0 text-sm text-right" value="1">
+</td>
+<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">0.00 DH</td>
+<td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+<button class="text-red-500 hover:text-red-700">
+<span class="w-5 h-5 flex items-center justify-center">
+<i class="ri-delete-bin-line"></i>
+</span>
+</button>
+</td>
+`;
+tbody.appendChild(newRow);
+// Add event listeners to new inputs
+const newPriceInput = newRow.querySelector('td:nth-child(2) input');
+const newQuantityInput = newRow.querySelector('td:nth-child(3) input');
+newPriceInput.addEventListener('input', calculateTotals);
+newQuantityInput.addEventListener('input', calculateTotals);
+// Add event listener to delete button
+const deleteButton = newRow.querySelector('button.text-red-500');
+deleteButton.addEventListener('click', function() {
+newRow.remove();
+calculateTotals();
+});
+});
+// Add event listener to existing delete buttons
+const deleteButtons = document.querySelectorAll('button.text-red-500');
+deleteButtons.forEach(button => {
+button.addEventListener('click', function() {
+const row = button.closest('tr');
+row.remove();
+calculateTotals();
+});
+});
+// Initialize calculations
+calculateTotals();
+});
+</script>
 </body>
 </html>
