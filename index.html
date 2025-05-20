@@ -461,6 +461,7 @@
           <button
             id="generatePdfBtn"
             class="bg-primary text-white px-6 py-3 flex items-center justify-center !rounded-button whitespace-nowrap"
+            onclick="generatePDF()"
           >
             <div class="w-5 h-5 flex items-center justify-center mr-2">
               <i class="ri-file-pdf-line"></i>
@@ -579,6 +580,52 @@
               doc.save(fileName);
             }
           </script>
+          <button
+            id="shareWhatsAppBtn"
+            class="bg-green-500 text-white px-6 py-3 flex items-center justify-center !rounded-button whitespace-nowrap"
+          >
+            <div class="w-5 h-5 flex items-center justify-center mr-2">
+              <i class="ri-whatsapp-line"></i>
+            </div>
+            Partager via WhatsApp
+          </button>
+          <div
+            id="shareModal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+          >
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+              <h3 class="text-lg font-medium mb-4">Partage via WhatsApp</h3>
+              <p class="text-gray-600 mb-4">
+                Le PDF a été généré. Que souhaitez-vous faire ?
+              </p>
+              <div class="flex flex-col gap-3">
+                <button
+                  id="downloadPdfBtn"
+                  class="bg-primary text-white px-4 py-2 rounded flex items-center justify-center"
+                >
+                  <div class="w-5 h-5 flex items-center justify-center mr-2">
+                    <i class="ri-download-line"></i>
+                  </div>
+                  Télécharger le PDF
+                </button>
+                <button
+                  id="openWhatsAppBtn"
+                  class="bg-green-500 text-white px-4 py-2 rounded flex items-center justify-center"
+                >
+                  <div class="w-5 h-5 flex items-center justify-center mr-2">
+                    <i class="ri-whatsapp-line"></i>
+                  </div>
+                  Ouvrir WhatsApp
+                </button>
+                <button
+                  id="closeModalBtn"
+                  class="text-gray-500 hover:text-gray-700 px-4 py-2 rounded"
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -628,6 +675,93 @@
           .addEventListener("click", function () {
             alert("Génération du PDF en cours...");
           });
+        document.addEventListener("DOMContentLoaded", function () {
+          const shareModal = document.getElementById("shareModal");
+          const shareWhatsAppBtn = document.getElementById("shareWhatsAppBtn");
+          const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+          const openWhatsAppBtn = document.getElementById("openWhatsAppBtn");
+          const closeModalBtn = document.getElementById("closeModalBtn");
+          let generatedPdfBlob = null;
+          shareWhatsAppBtn.addEventListener("click", async function () {
+            try {
+              const doc = new window.jspdf.jsPDF();
+              if (logoImage) {
+                doc.addImage(logoImage, "JPEG", 140, 10, 40, 40);
+              }
+              doc.setFontSize(24);
+              doc.setFont("helvetica", "bold");
+              doc.text("FACTURE", 105, 20, { align: "center" });
+              doc.setFontSize(10);
+              doc.setFont("helvetica", "normal");
+              doc.text(
+                `Numéro: ${document.getElementById("invoiceNumber").value}`,
+                20,
+                40,
+              );
+              doc.text(
+                `Date: ${document.getElementById("invoiceDate").value}`,
+                20,
+                45,
+              );
+              const tableData = [];
+              document.querySelectorAll("#invoiceLines tr").forEach((row) => {
+                const description = row.querySelector(".item-description").value;
+                const price = row.querySelector(".item-price").value;
+                const quantity = row.querySelector(".item-quantity").value;
+                const total = row.querySelector(".item-total").textContent;
+                tableData.push([description, price, quantity, total]);
+              });
+              doc.autoTable({
+                startY: 90,
+                head: [["Description", "Prix unitaire", "Quantité", "Total"]],
+                body: tableData,
+                theme: "striped",
+                headStyles: { fillColor: [79, 70, 229] },
+              });
+              generatedPdfBlob = doc.output("blob");
+              const file = new File([generatedPdfBlob], "facture.pdf", {
+                type: "application/pdf",
+              });
+              if (navigator.share && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                  files: [file],
+                  title: "Facture",
+                  text: "Voici votre facture",
+                });
+              } else {
+                shareModal.classList.remove("hidden");
+              }
+            } catch (error) {
+              shareModal.classList.remove("hidden");
+            }
+          });
+          downloadPdfBtn.addEventListener("click", function () {
+            if (generatedPdfBlob) {
+              const url = URL.createObjectURL(generatedPdfBlob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "facture.pdf";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }
+            shareModal.classList.add("hidden");
+          });
+          openWhatsAppBtn.addEventListener("click", function () {
+            const message = encodeURIComponent("Voici votre facture");
+            window.open(`https://wa.me/?text=${message}`, "_blank");
+            shareModal.classList.add("hidden");
+          });
+          closeModalBtn.addEventListener("click", function () {
+            shareModal.classList.add("hidden");
+          });
+          window.addEventListener("click", function (event) {
+            if (event.target === shareModal) {
+              shareModal.classList.add("hidden");
+            }
+          });
+        });
         async function generatePDF() {
           window.jsPDF = window.jspdf.jsPDF;
           const doc = new jsPDF();
